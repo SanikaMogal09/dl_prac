@@ -1,0 +1,1722 @@
+Part 1: Understand the Basic Concepts First
+Q1. What is Machine Learning?
+Answer:
+
+Machine Learning is a branch of Artificial Intelligence (AI) that enables computers to learn patterns from data and make predictions without being explicitly programmed with every rule.
+Example
+Suppose we give a computer thousands of pictures of cats and dogs.
+- Initially, the computer doesn't know the difference.
+- We train it using pictures.
+- It learns patterns from those pictures.
+- Later, when we give it a new picture, it predicts whether it contains a cat or a dog.
+This process is called Machine Learning.
+Q2. What is Deep Learning?
+Answer:
+
+Deep Learning is a subset of Machine Learning that uses artificial neural networks with multiple layers to learn complex patterns from data.
+
+Think of a neural network as a system that learns by adjusting numerical values called weights.
+
+For example, a neural network can learn to:
+- Recognize images.
+- Understand human language.
+- Recognize speech.
+- Make predictions.
+Remember the relationship:
+
+Artificial Intelligence → Machine Learning → Deep Learning.
+
+Deep Learning is part of Machine Learning, which is part of Artificial Intelligence.
+Q3. What is Natural Language Processing (NLP)?
+Answer:
+
+Natural Language Processing, or NLP, is a field of AI that helps computers process and understand human language.
+
+Examples include:
+- Chatbots.
+- Language translation.
+- Text summarization.
+- Sentiment analysis.
+- Predicting the next word in a sentence.
+Your CBOW practical is related to NLP because it teaches a neural network to predict a word from the words surrounding it.
+Q4. What is CBOW?
+Answer:
+
+CBOW stands for Continuous Bag of Words.
+
+It is a Word2Vec model architecture that learns word representations by predicting a target word from its surrounding context words.
+
+In simple language, the model looks at the words around a missing word and tries to guess the missing word.
+Example
+Consider this sentence:
+Deep learning is powerful.
+
+Suppose the word is is missing.
+
+The surrounding words might be:
+- Deep
+- learning
+- powerful
+The CBOW model uses the context words to predict the missing word.
+
+Conceptually:
+
+Input: Context words
+Processing: Neural network
+Output: Predicted target word
+
+Your practical uses this same idea, although it uses a small custom dataset instead of a large language corpus.
+Q5. What does the word "context" mean in CBOW?
+Answer:
+
+Context means the words surrounding the target word.
+
+For example:
+
+deep learning uses neural networks
+
+If uses is the target word and the window size is 2, the context is:
+- deep
+- learning
+- neural
+- networks
+The model uses these four context words to predict uses.
+Q6. What is a target word?
+Answer:
+
+The target word is the word that the model must predict using its context.
+
+For example:
+Context words	Target word
+deep, learning, neural, networks	uses
+
+
+During training, the model learns which target words are associated with particular context words.
+Q7. What is Word2Vec?
+Answer:
+
+Word2Vec is a technique for learning numerical representations of words from their surrounding words.
+
+These numerical representations are called word embeddings.
+
+Word2Vec has two famous architectures:
+1. CBOW: Predicts a target word from surrounding words.
+2. Skip-gram: Predicts surrounding words from a target word.
+The difference is important for viva examinations.
+CBOW	Skip-gram
+Context words are inputs.	Target word is the input.
+Predicts the target word.	Predicts surrounding words.
+Usually efficient for frequent words.	Can work well for less frequent words.
+
+
+Part 2: Importing the Libraries
+Your first code cell imports the libraries needed to prepare the text and build the neural network.    Pasted text
+Q8. What does each imported library do?
+Your code is:
+import numpy as npimport tensorflow as tfimport matplotlib.pyplot as pltfrom tensorflow.keras.models import Sequentialfrom tensorflow.keras.layers import Embedding, Dense, Lambdafrom tensorflow.keras.preprocessing.text import Tokenizerfrom sklearn.decomposition import PCA
+
+
+Let's understand every line.
+1. import numpy as np
+Question: What is NumPy?
+
+Answer: NumPy is a Python library used to work with numerical data, arrays, and mathematical operations.
+
+For example:
+import numpy as npnumbers = np.array([1, 2, 3, 4])print(numbers)
+
+
+Output:
+[1 2 3 4]
+
+In your CBOW program, NumPy converts the training examples into arrays:
+X = np.array(X)Y = np.array(Y)
+
+
+Here:
+- X contains the context words.
+- Y contains the target words.
+- np.array() converts the lists into numerical arrays.
+Viva question: Why do we use NumPy?
+
+NumPy makes it easy to store and perform mathematical operations on numerical data.
+2. import tensorflow as tf
+Question: What is TensorFlow?
+
+Answer: TensorFlow is a Machine Learning and Deep Learning library used to build, train, and evaluate neural networks.
+
+In your program, TensorFlow helps calculate the average of word embeddings:
+tf.reduce_mean(x, axis=1)
+
+
+We will understand this line when we reach the model architecture.
+
+Viva question: Why do we use TensorFlow?
+
+We use TensorFlow to implement and train the neural network.
+3. import matplotlib.pyplot as plt
+Question: What is Matplotlib?
+
+Answer: Matplotlib is a Python library used to create graphs and visualizations.
+
+Your code uses it to plot the model's training loss:
+plt.plot(history.history['loss'])
+
+
+The graph helps us understand whether the model is learning during training.
+
+Viva question: Why do we plot the loss graph?
+
+To visualize how the model's loss changes over the training epochs.
+4. from tensorflow.keras.models import Sequential
+Question: What is Sequential?
+
+Answer: Sequential is a Keras model that allows us to stack neural network layers one after another.
+
+Imagine a factory assembly line:
+1. The first stage receives the input.
+2. The next stage processes it.
+3. The final stage produces the output.
+Similarly, in your model:
+Input context words
+        ↓
+Embedding layer
+        ↓
+Lambda layer
+        ↓
+Dense layer
+        ↓
+Output layer
+
+Viva question: Why do we use Sequential?
+
+It provides a simple way to create a neural network with a linear stack of layers.
+5. from tensorflow.keras.layers import Embedding, Dense, Lambda
+Question: What are these three layers used for?
+
+Answer:
+Layer	Purpose in your CBOW model
+Embedding	Converts word IDs into learnable numerical vectors.
+Lambda	Averages the context-word vectors.
+Dense	Performs calculations to learn patterns and predict the target word.
+
+
+We will study each layer in detail in Part 6.
+6. from tensorflow.keras.preprocessing.text import Tokenizer
+Question: What is a Tokenizer?
+
+Answer: A tokenizer processes text and assigns a numerical ID to each unique word.
+
+For example:
+deep      → 1
+learning  → 2
+model     → 3
+
+These IDs are illustrative; your actual IDs depend on the words and their frequencies in your dataset.
+
+Computers cannot directly process ordinary words in a neural network's numerical calculations. Tokenization gives the model numerical representations it can work with.
+7. from sklearn.decomposition import PCA
+Question: What is PCA?
+
+Answer: PCA stands for Principal Component Analysis. It is a technique for reducing the number of dimensions in numerical data while preserving as much variation as possible.
+
+For example, suppose each word is represented by a vector containing 10 numbers. PCA can help project those vectors into two dimensions so they can be plotted on a graph.
+
+Important observation about your code: PCA is imported, but the code in your notebook does not actually use it. You should not claim that your program performs PCA during execution.
+Part 3: Preparing the Dataset
+Q9. What is a dataset?
+Answer:
+
+A dataset is a collection of data used by a computer program.
+
+For your practical, the dataset is a collection of English sentences about Deep Learning, Machine Learning, neural networks, TensorFlow, and related topics.
+
+Unlike image classification, your model works with text.
+Q10. Explain the sample text in your code.
+Your code begins with:
+# Sample textdata = """Deep learning is a branch of machine learning.Machine learning is a part of artificial intelligence.Artificial intelligence allows computers to learn from data.Deep learning uses neural networks to learn patterns.Neural networks contain input hidden and output layers."""
+
+
+Your actual notebook contains additional sentences beyond these examples.    Pasted text
+
+Let's understand it line by line.
+Line 1: # Sample text
+Question: What does # mean in Python?
+
+Answer: The # symbol starts a comment.
+
+A comment explains the code to a human reader. Python ignores it when executing the program.
+
+For example:
+# This is a comment
+
+
+It does not perform any computation.
+Line 2: data = """ ... """
+Question: What is the purpose of data?
+
+Answer: data is a variable that stores the text used for training.
+
+A variable is a named location used to hold a value.
+
+For example:
+name = "Sanika"age = 21
+
+
+Here, name stores text and age stores a number.
+
+In your program:
+data = """Your sample sentences"""
+
+
+The variable data stores multiple sentences.
+
+Question: Why are triple quotation marks used?
+
+Triple quotation marks allow a string to span multiple lines.
+
+For example:
+text = """Deep learning is useful.Machine learning is powerful."""
+
+
+Both sentences are stored in the same string.
+Line 3: data = data.lower()
+Question: What does .lower() do?
+
+Answer: It converts all uppercase letters in the text into lowercase letters.
+
+For example:
+
+Before:
+Deep Learning Is Useful
+
+After:
+deep learning is useful
+
+Why is this necessary?
+
+Without converting the text to lowercase, Deep and deep could be treated as two different tokens by a case-sensitive tokenizer.
+
+Converting the text to lowercase helps reduce such unnecessary differences.
+
+Viva question: Is .lower() a Machine Learning function?
+
+No. It is a standard Python string method used to preprocess text.
+Part 4: Tokenization and Converting Words into Numbers
+This is one of the most important parts of your practical.
+Q11. What is tokenization?
+Answer:
+
+Tokenization is the process of dividing text into smaller units called tokens.
+
+In this practical, the tokens are words.
+
+For example:
+Deep learning is useful
+
+Becomes:
+["deep", "learning", "is", "useful"]
+
+The tokenizer then assigns each unique word a numerical ID.
+Q12. Explain the Tokenizer code line by line.
+Your code is:
+tokenizer = Tokenizer()tokenizer.fit_on_texts([data])
+
+
+Line 1: tokenizer = Tokenizer()
+Question: What happens here?
+
+Answer: This creates a tokenizer object.
+
+You can think of it as creating a tool that will learn which words appear in your dataset and assign IDs to them.
+Line 2: tokenizer.fit_on_texts([data])
+Question: What does fit_on_texts() do?
+
+Answer: It examines the text and builds a word-to-number mapping.
+
+For example, consider:
+deep learning is useful
+deep learning is powerful
+
+The tokenizer might create a mapping such as:
+{    "deep": 1,    "learning": 2,    "is": 3,    "useful": 4,    "powerful": 5}
+
+
+These numbers are only illustrative.
+
+Why do we write [data] instead of just data?
+
+The method accepts a collection of text documents. Here, the square brackets place your entire dataset into a list containing one text document.
+
+Your notebook uses the whole text as a single document for fitting the tokenizer.
+Q13. What is tokenizer.word_index?
+Answer:
+
+word_index is a dictionary that maps each word to its numerical ID.
+
+Your code prints it using:
+print("Word Index:", tokenizer.word_index)
+
+
+Your actual output begins like this:
+Word Index: {
+    'learning': 1,
+    'the': 2,
+    'deep': 3,
+    'data': 4,
+    'neural': 5,
+    ...
+}
+
+Your complete vocabulary contains 84 unique words.
+
+Notice something interesting: learning has ID 1, the has ID 2, and deep has ID 3.
+
+Why is learning assigned ID 1?
+
+Keras's tokenizer assigns IDs based on word frequency, generally placing more frequent words first. It does not assign IDs according to alphabetical order.
+
+Therefore, the IDs represent word identities, not the meanings or importance of the words.
+Q14. Explain this line.
+words = data.replace(".", "").split()
+
+
+Answer:
+
+This line creates a list of words from the original text.
+
+Let's divide it into two operations.
+
+Operation 1:
+data.replace(".", "")
+
+
+This removes full stops from the text.
+
+For example:
+deep learning is useful.
+
+Becomes:
+deep learning is useful
+
+Operation 2:
+.split()
+
+
+This splits the text at whitespace, producing individual words.
+
+Example:
+"deep learning is useful".split()
+
+
+Output:
+["deep", "learning", "is", "useful"]
+
+
+Important: Your variable words is created but is not subsequently used in the shown training code. The actual numerical sequence is generated using the tokenizer.
+Q15. Explain vocab_size = len(tokenizer.word_index) + 1.
+Answer:
+
+This line calculates the vocabulary size.
+
+Let's break it down:
+- tokenizer.word_index is the dictionary of unique words.
+- len(tokenizer.word_index) counts the number of entries in that dictionary.
+- + 1 accounts for the fact that your word IDs start at 1, leaving index 0 available for padding.
+Your output contains 84 unique words.
+
+Therefore:
+vocab_size = 84 + 1
+
+
+Output:
+vocab_size = 85
+
+Viva question: Why do we add 1 to the vocabulary size?
+
+Because word IDs start from 1, and the embedding and output layers need enough indices to accommodate all the word IDs, including index 0.
+
+For example, if there are 84 unique words, the IDs range from 1 to 84. The model therefore needs 85 possible indices, numbered 0 through 84.
+Q16. Explain sequence = tokenizer.texts_to_sequences([data])[0].
+Answer:
+
+This line converts the entire text into a sequence of numerical IDs.
+
+Let's break it down:
+tokenizer.texts_to_sequences([data])
+
+
+Converts the words into numbers.
+
+For example, suppose the word mapping is:
+{    "deep": 1,    "learning": 2,    "is": 3}
+
+
+Then:
+deep learning is
+
+Becomes:
+[1, 2, 3]
+
+The actual mapping in your notebook is different.
+
+Why do we use [0] at the end?
+
+The method returns a list containing one sequence because you supplied one text document.
+
+The [0] selects the first sequence from that list.
+
+So:
+sequence = tokenizer.texts_to_sequences([data])[0]
+
+
+stores the numerical sequence directly in sequence.
+Q17. What is the output of the sequence conversion?
+Your notebook prints:
+print("Word Index:", tokenizer.word_index)print("Sequence:", sequence)
+
+
+The output starts:
+Word Index: {'learning': 1, 'the': 2, 'deep': 3, ...}
+
+Sequence: [3, 1, 11, 6, 38, 12, 13, 1, ...]
+
+Let's decode the first few IDs using your actual word mapping:
+Word	Numerical ID
+deep	3
+learning	1
+is	11
+a	6
+branch	38
+of	12
+machine	13
+
+
+The first sentence is:
+Deep learning is a branch of machine learning.
+
+Its numerical representation is:
+[3, 1, 11, 6, 38, 12, 13, 1]
+
+The period is ignored by the tokenizer's default text filtering.
+
+Remember: The computer is now working with numerical IDs rather than the original words.
+Part 5: Generating Training Data for CBOW
+This is the stage where your program learns which words should be used as context and which word should be predicted.
+Q18. What is training data?
+Answer:
+
+Training data is the data given to a Machine Learning model so it can learn patterns.
+
+In your CBOW model, training data consists of two parts:
+- X: Context words provided as input.
+- Y: The target word the model should predict.
+For example:
+Sentence: Deep learning is a branch of machine learning.
+
+Suppose the target word is is.
+
+The input is:
+deep, learning, a, branch
+
+The expected output is:
+is
+
+The model learns to associate these context words with the target word.
+Q19. What is a window size in CBOW?
+Answer:
+
+The window size determines how many words are considered on each side of the target word.
+
+Your code uses:
+window_size = 2
+
+
+This means the model takes up to two words from the left and two words from the right of the target word.
+
+For example:
+Deep learning is a branch
+
+If the target word is is:
+Left context:  Deep, learning
+Target:        is
+Right context: a, branch
+
+The training example becomes:
+Input:  [deep, learning, a, branch]
+Target: is
+
+Therefore, the context contains four words.
+
+Viva question: Why do we use a window size of 2?
+
+It provides two context words on each side of the target, giving four context words in total when both sides have enough words available.
+Q20. Explain the complete code for generating training data.
+Your code is:
+window_size = 2X = []Y = []for i in range(window_size, len(sequence) - window_size):    context = sequence[i-2:i] + sequence[i+1:i+3]    target = sequence[i]    X.append(context)    Y.append(target)X = np.array(X)Y = np.array(Y)print("Context:", X[:5])print("Target:", Y[:5])
+
+
+Let's understand every line.
+Line 1: window_size = 2
+This specifies the number of words to consider on each side of the target word.
+
+The total number of context words is:
+\[
+2 \times \text{window size} = 2 \times 2 = 4
+\]
+Therefore, each training input contains four word IDs.
+Line 2: X = []
+This creates an empty Python list.
+
+We will store the context words in X.
+
+Initially:
+X = []
+
+
+After generating some training examples, it might look like:
+X = [    [3, 1, 6, 38],    [1, 11, 38, 12]]
+
+
+Each row represents four context words.
+Line 3: Y = []
+This creates another empty list.
+
+We will store the target word IDs in Y.
+
+For the example above:
+Y = [11, 6]
+
+
+The first target ID is 11, representing is, and the second is 6, representing a.
+
+The two lists must contain matching examples in the same order.
+Line 4: Understanding the for loop
+for i in range(window_size, len(sequence) - window_size):
+
+
+Question: What does range() do?
+
+Answer: range() generates a sequence of integers used to repeat an operation.
+
+Here:
+range(2, len(sequence) - 2)
+
+
+The loop starts at index 2 and stops before the final two positions.
+
+Why does it start at 2?
+
+Because we need two words before the target word.
+
+Why does it stop before the final two positions?
+
+Because we also need two words after the target word.
+
+Without these restrictions, the context could be incomplete.
+
+Question: What is i?
+
+i is the index of the current target word in the numerical sequence.
+
+For example:
+Index:  0   1   2   3   4
+Word:   A   B   C   D   E
+
+When i = 2, the target word is C.
+Line 5: Extracting the context
+context = sequence[i-2:i] + sequence[i+1:i+3]
+
+
+This is one of the most important lines in the practical.
+
+Let's break it into two parts.
+
+Part A:
+sequence[i-2:i]
+
+
+This selects two words before the target.
+
+For example, if:
+sequence = [A, B, C, D, E]
+
+and i = 2, then:
+sequence[0:2]
+
+
+returns:
+[A, B]
+
+Notice that Python slicing excludes the ending index.
+
+Part B:
+sequence[i+1:i+3]
+
+
+This selects two words after the target.
+
+For the same example:
+sequence[3:5]
+
+
+returns:
+[D, E]
+
+Combining both parts:
+[A, B] + [D, E]
+
+
+produces:
+[A, B, D, E]
+
+The target word C is deliberately excluded from the context.
+Line 6: Extracting the target word
+target = sequence[i]
+
+
+This selects the word at the current index.
+
+In our example:
+sequence = [A, B, C, D, E]
+
+When i = 2:
+target = sequence[2]
+
+
+Therefore:
+target = C
+
+Now we have:
+Context: A, B, D, E
+Target:  C
+
+That is exactly the structure required for a CBOW training example.
+Lines 7–8: Storing the training examples
+X.append(context)Y.append(target)
+
+
+Question: What does append() do?
+
+Answer: append() adds an item to the end of a list.
+
+The first line stores the context in X.
+
+The second line stores the target in Y.
+
+For example:
+X = [[3, 1, 6, 38]]Y = [11]
+
+
+These values represent:
+Context: deep, learning, a, branch
+Target:  is
+
+The loop repeats this process for many positions in the sequence.
+Lines 9–10: Converting lists into arrays
+X = np.array(X)Y = np.array(Y)
+
+
+The context and target lists are converted into NumPy arrays.
+
+Why?
+
+Because numerical arrays are convenient for passing batches of training data into TensorFlow and Keras.
+
+The shapes are conceptually:
+X: (number_of_examples, 4)
+Y: (number_of_examples,)
+
+The second dimension of X is 4 because every context contains four words.
+Lines 11–12: Printing the first five examples
+print("Context:", X[:5])print("Target:", Y[:5])
+
+
+The slice:
+X[:5]
+
+
+selects the first five rows of X.
+
+Similarly:
+Y[:5]
+
+
+selects the first five target IDs.
+
+Your notebook displays:
+Context:
+[[ 3  1  6 38]
+ [ 1 11 38 12]
+ [11  6 12 13]
+ [ 6 38 13  1]
+ [38 12  1 13]]
+
+Target:
+[11  6 38 12 13]
+
+Let's decode this output using your actual word index.
+Example	Context word IDs	Context words	Target ID	Target word
+1	[3, 1, 6, 38]	deep, learning, a, branch	11	is
+2	[1, 11, 38, 12]	learning, is, branch, of	6	a
+3	[11, 6, 12, 13]	is, a, of, machine	38	branch
+4	[6, 38, 13, 1]	a, branch, machine, learning	12	of
+5	[38, 12, 1, 13]	branch, of, learning, machine	13	machine
+
+
+What should you say if the examiner asks you to explain this output?
+
+You can answer:
+
+"The context array X contains four surrounding word IDs for each example, and the target array Y contains the corresponding word ID that the model must predict. The first example uses deep, learning, a, and branch to predict is."
+An important limitation in your code
+Your text contains multiple sentences, but the program tokenizes the entire text into one long sequence before generating the context windows.
+
+As a result, some training examples can combine words from different sentences. For example, a context window near the end of one sentence may include words from the next sentence.
+
+This does not prevent the code from running, but it is a limitation of the training-data preparation.
+Part 6: Building the CBOW Neural Network
+Now we come to the Deep Learning part of your practical.
+
+Until now, we have prepared the data. Next, we create a neural network that learns to predict the target word from the context.
+Q21. What is a neural network?
+Answer:
+
+A neural network is a computational model inspired by the way interconnected neurons are organized in the brain.
+
+An artificial neural network contains layers of numerical calculations. During training, it adjusts its weights to learn patterns in the data.
+
+Your model contains four layers:
+1. Embedding layer.
+2. Lambda layer.
+3. Dense layer with 64 neurons.
+4. Output Dense layer.
+Q22. Explain model = Sequential().
+Your code:
+model = Sequential()
+
+
+Answer:
+
+This creates an empty neural network using Keras's Sequential API.
+
+Initially, the model has no layers.
+
+We add layers one by one using model.add().
+Q23. Explain the Embedding layer.
+Your code:
+model.add(Embedding(vocab_size, 10, input_length=4))
+
+
+Answer:
+
+The Embedding layer converts each word ID into a vector of 10 learnable numbers.
+
+Let's break it down.
+What does vocab_size mean?
+In your program:
+vocab_size = 85
+
+
+This is the first argument to Embedding.
+
+It specifies the number of possible word indices, including index 0.
+What does 10 mean?
+The second argument is the embedding dimension.
+Embedding(vocab_size, 10, ...)
+
+
+It tells the model to represent each word using 10 numerical values.
+
+For example, a word might have an embedding like:
+[0.12, -0.35, 0.08, 0.41, -0.17,
+ 0.23, 0.05, -0.29, 0.14, 0.31]
+
+These are illustrative values, not the actual learned embeddings from your model.
+
+During training, the embedding values are adjusted to help the model predict the target word.
+What does input_length=4 mean?
+It indicates that each input contains four context words.
+
+For example:
+deep, learning, a, branch
+
+The embedding layer converts these four word IDs into four vectors, each containing 10 numbers.
+
+The resulting shape is:
+(4, 10)
+
+For an entire batch of training examples, the conceptual shape is:
+(batch_size, 4, 10)
+
+Viva question: What is an embedding?
+
+An embedding is a dense numerical vector representing a word in a learned vector space.
+
+Viva question: Why do we use an Embedding layer?
+
+To convert discrete word IDs into learnable numerical representations that the neural network can process.
+
+Note: Your notebook shows a warning that input_length is deprecated. This is a warning, not a training failure. In newer Keras versions, you can omit input_length from this layer.
+Q24. Explain the Lambda layer.
+Your code:
+model.add(Lambda(lambda x: tf.reduce_mean(x, axis=1)))
+
+
+Answer:
+
+The Lambda layer applies a custom operation to the output of the previous layer.
+
+In your model, it calculates the average of the four context-word embeddings.
+
+Let's understand this step by step.
+
+Suppose the embedding layer generates four vectors:
+Word 1: [1, 2]
+Word 2: [3, 4]
+Word 3: [5, 6]
+Word 4: [7, 8]
+
+These numbers are just an example using two-dimensional vectors for easy understanding.
+
+The Lambda layer calculates the average:
+\[
+\text{Average}=\frac{\text{Vector 1}+\text{Vector 2}+\text{Vector 3}+\text{Vector 4}}{4}
+\]
+The result is:
+[4, 5]
+
+Instead of passing four separate vectors to the next layer, the model passes one averaged vector.
+What does tf.reduce_mean() do?
+It calculates the mean, or average, of values along a specified dimension.
+What does axis=1 mean?
+For the embedded input shape:
+(batch_size, 4, 10)
+
+axis=1 refers to the four context positions.
+
+The average is calculated across those four positions, producing:
+(batch_size, 10)
+
+Viva question: Why do we average the embeddings?
+
+CBOW combines the representations of the surrounding words into one context representation, which the model uses to predict the target word.
+
+Viva question: Why is the model called a Bag of Words?
+
+In this implementation, averaging the context embeddings removes their positional order from the combined representation. The model uses the collection of context words to predict the target rather than preserving the order of those words in that averaged vector.
+Q25. Explain the first Dense layer.
+Your code:
+model.add(Dense(64, activation='relu'))
+
+
+Answer:
+
+This adds a fully connected neural network layer containing 64 neurons.
+
+Let's break it down.
+What does Dense mean?
+A Dense layer is a fully connected layer in which each neuron receives input from all the outputs of the previous layer.
+What does 64 mean?
+It is the number of neurons in this layer.
+
+Each neuron performs calculations using learned weights and a bias.
+What does activation='relu' mean?
+ReLU stands for Rectified Linear Unit.
+
+It is an activation function defined as:
+\[
+\operatorname{ReLU}(x)=\max(0,x)
+\]
+This means:
+- If the input is negative, the output is 0.
+- If the input is positive, the output is the same positive value.
+Examples:
+Input	ReLU output
+-5	0
+-1	0
+0	0
+2	2
+8	8
+
+
+Viva question: Why do we use ReLU?
+
+ReLU introduces nonlinearity, allowing the neural network to learn more complex patterns.
+Q26. Explain the output Dense layer.
+Your code:
+model.add(Dense(vocab_size, activation='softmax'))
+
+
+Answer:
+
+This is the final layer of your model.
+
+It generates a prediction score for every possible word ID in the vocabulary.
+
+Since your vocab_size is 85, the output contains 85 values.
+
+Conceptually:
+Output:
+[0.01, 0.02, 0.04, ..., 0.70, ...]
+
+These values are illustrative. In your actual model, the values depend on the learned weights and the supplied context.
+What is Softmax?
+Softmax converts the output scores into nonnegative values that sum to 1.
+
+For example:
+Word A: 0.10
+Word B: 0.70
+Word C: 0.20
+
+These values can be interpreted as the model's predicted probabilities across the three example classes.
+
+Word B has the highest predicted probability.
+
+Your output layer uses:
+activation='softmax'
+
+
+because the model must select one target word from the vocabulary.
+
+Viva question: Why do we use Softmax in the output layer?
+
+Softmax produces a probability distribution over the possible target words, allowing the model to select the most likely word.
+Part 7: Compiling and Training the Model
+Now that we have created the network, we need to configure it and train it.
+Q27. What does model compilation mean?
+Answer:
+
+Compiling a model means specifying how the neural network should measure its errors, update its weights, and evaluate its performance.
+
+Your code is:
+model.compile(    loss='sparse_categorical_crossentropy',    optimizer='adam',    metrics=['accuracy'])
+
+
+Let's understand each argument.
+1. loss='sparse_categorical_crossentropy'
+Question: What is loss?
+
+Answer:
+
+Loss measures how far the model's predictions are from the correct answers.
+
+For example, suppose the correct target word is is.
+
+The model predicts:
+is:    0.20
+a:     0.60
+deep:  0.10
+other: 0.10
+
+The model assigns a probability of only 0.20 to the correct answer.
+
+That is a poor prediction, so the loss is relatively high.
+
+If the model instead assigns a probability of 0.90 to is, its loss is much lower.
+
+What is sparse categorical cross-entropy?
+
+It is a loss function used for classification tasks where:
+- There are multiple possible classes.
+- Each example has one correct class.
+- The correct class is represented by an integer label.
+In your program, the classes are the vocabulary word IDs, and Y contains integer target IDs.
+
+For example:
+Correct target ID = 11
+
+The loss function compares the model's predicted probability distribution with the correct target ID.
+
+Viva question: Why don't we use ordinary accuracy alone to train the model?
+
+Accuracy only tells us how many predictions are correct. Loss also measures how much probability the model assigns to the correct answer, providing a useful signal for adjusting the weights during training.
+2. optimizer='adam'
+Question: What is an optimizer?
+
+Answer:
+
+An optimizer updates the neural network's weights during training to reduce the loss.
+
+Imagine that the model initially predicts the wrong word. The optimizer helps adjust the weights so that the model can make better predictions.
+
+Your code uses:
+optimizer='adam'
+
+
+Adam stands for Adaptive Moment Estimation.
+
+It is a widely used optimization algorithm that adapts the size of parameter updates based on information from previous gradients.
+
+Viva question: Why do we use Adam?
+
+Adam is popular because it generally provides efficient and effective weight updates without requiring extensive manual tuning.
+
+Important distinction: Your practical uses Adam, not SGD. If your examiner asks you to implement the model using Stochastic Gradient Descent (SGD), you would change the optimizer accordingly.
+3. metrics=['accuracy']
+Question: What is accuracy?
+
+Answer:
+
+Accuracy measures the proportion of predictions for which the predicted class matches the correct class.
+
+The formula is:
+\[
+\text{Accuracy}=\frac{\text{Correct predictions}}{\text{Total predictions}}\times100
+\]
+For example, if a model correctly predicts 60 out of 100 target words:
+\[
+\text{Accuracy}=\frac{60}{100}\times100=60\%
+\]
+Your model uses accuracy as a performance metric so that you can observe how often it predicts the correct target word.
+Q28. Explain the model training line.
+Your code:
+history = model.fit(X, Y, epochs=100, verbose=1)
+
+
+This is the line that actually trains the model.
+
+Let's break it down.
+What does model.fit() do?
+model.fit() trains the neural network using the supplied inputs and expected outputs.
+
+In your program:
+- X contains the context word IDs.
+- Y contains the correct target word IDs.
+The model makes predictions, calculates the loss, and updates its weights.
+What does epochs=100 mean?
+An epoch is one complete pass through the training dataset.
+
+For example:
+epochs=100
+
+
+instructs the model to train for 100 epochs.
+
+Conceptually:
+Epoch 1: Model learns from the dataset.
+Epoch 2: Model learns from the dataset again.
+Epoch 3: Model learns again.
+...
+Epoch 100: Final training pass.
+
+The model can improve its predictions as its weights are updated across these passes.
+
+Viva question: What is an epoch?
+
+One complete pass through the training dataset.
+
+Viva question: What happens if we increase the number of epochs?
+
+The model gets more opportunities to learn patterns from the training data. However, more epochs do not always guarantee better performance on new data. Excessive training can lead to overfitting.
+What does verbose=1 mean?
+It controls the amount of progress information printed during training.
+
+Common values are:
+- verbose=0: No training progress is displayed.
+- verbose=1: Displays a progress bar and metrics.
+- verbose=2: Displays a more compact line for each epoch.
+Your program uses verbose=1, so the training output includes a progress bar.
+What does history contain?
+The model.fit() method returns a History object.
+
+Your code stores it in:
+history
+
+
+This object contains the training metrics recorded during each epoch.
+
+For example:
+history.history['loss']
+
+
+contains the loss values across epochs.
+
+Similarly:
+history.history['accuracy']
+
+
+contains the recorded accuracy values across epochs.
+
+These values are used later to visualize the training process.
+Part 8: Understanding the Training Output
+Q29. What does the training output mean?
+Your notebook displays output in this format:
+Epoch 1/100
+5/5 ━━━━━━━━━━━━ 1s 5ms/step - accuracy: 0.0000e+00 - loss: 4.4431
+
+Epoch 2/100
+5/5 ━━━━━━━━━━━━ 0s 6ms/step - accuracy: 0.0701 - loss: 4.4382
+
+...
+
+Epoch 100/100
+5/5 ━━━━━━━━━━━━ 0s 6ms/step - accuracy: 0.6051 - loss: 1.6353
+
+Let's understand each part.
+1. Epoch 1/100
+This means the model is completing its first epoch out of 100 planned epochs.
+2. 5/5
+This indicates that five training batches were processed out of five batches in that epoch.
+
+A batch is a group of training examples processed together.
+
+Because your code does not explicitly specify batch_size, Keras uses its default batch size of 32 for this model.
+
+With five batches, the training dataset contains between 129 and 160 examples if all five batches are full except possibly the last. The exact number of examples cannot be determined from this output alone.
+3. 5ms/step
+This indicates the approximate time taken per training step.
+
+The reported time can vary with hardware, system load, and other execution conditions.
+4. loss: 4.4431
+This is the loss recorded during the first epoch.
+
+A lower loss generally means the model assigns higher probabilities to the correct target words.
+
+Your training output shows that loss decreases substantially as training progresses.
+5. accuracy: 0.6051
+This is the accuracy shown at the end of the 100th epoch.
+
+The decimal value can be converted into a percentage:
+\[
+0.6051\times100=60.51\%
+\]
+This is the accuracy reported for that training epoch, not a measurement on an independent test dataset.
+Q30. Is the model learning successfully?
+Answer:
+
+Your training output suggests that the model is learning patterns from the training data.
+
+Compare the first and last epochs:
+Metric	Early training	Final training epoch
+Loss	4.4431	1.6353
+Accuracy	0.0000	0.6051
+Interpretation	Initial predictions are poor	More target words are predicted correctly
+
+
+The loss decreases while the accuracy generally increases.
+
+This suggests that the optimizer is improving the model's fit to the training examples.
+
+However, we cannot conclude that the model generalizes well to unseen text because the code does not use a separate validation or test dataset.
+
+Also, your training data consists of a small collection of sentences, so this is primarily a demonstration of the CBOW architecture rather than a production-quality language model.
+Part 9: Evaluating the Trained Model
+Q31. What is model evaluation?
+Answer:
+
+Model evaluation measures the performance of a trained model on a dataset.
+
+Your code is:
+loss, accuracy = model.evaluate(X, Y, verbose=0)print("Final Loss:", loss)print("Final Accuracy:", accuracy * 100, "%")
+
+
+Let's understand it line by line.
+Line 1: model.evaluate(X, Y, verbose=0)
+This calculates the loss and accuracy of the trained model on the supplied dataset.
+
+Here:
+- X contains the context words.
+- Y contains the correct target words.
+- verbose=0 suppresses the progress display.
+The method returns two values because you configured the model to track loss and accuracy.
+Line 2: loss, accuracy = ...
+This assigns the two returned values to separate variables.
+
+For example:
+loss = 1.616accuracy = 0.624
+
+
+These values are illustrative approximations of your notebook's actual output.
+Line 3: print("Final Loss:", loss)
+This prints the loss value.
+
+Your notebook reports:
+Final Loss: 1.616173505783081
+
+This is the loss measured on the supplied training data after training.
+
+A lower loss is generally desirable, but the value is most useful when compared with other training runs or datasets.
+Line 4: print("Final Accuracy:", accuracy * 100, "%")
+The accuracy returned by Keras is a decimal between 0 and 1.
+
+Multiplying by 100 converts it into a percentage.
+
+Your output is:
+Final Accuracy: 62.42038011550903 %
+
+This means approximately 62.42% training accuracy.
+
+It does not mean that the model understands 62.42% of the English language. It means that approximately 62.42% of the evaluated training examples had the correct target word as the model's top prediction.
+Q32. Why is the final accuracy different from the last training accuracy?
+Answer:
+
+Your last epoch reports approximately 60.51% accuracy, while the subsequent evaluation reports approximately 62.42%.
+
+This difference is possible because:
+- Training metrics are recorded while weights are being updated throughout the epoch.
+- Evaluation calculates metrics using the final weights after training.
+The two measurements therefore need not be identical.
+
+Viva question: Why should we evaluate a model after training?
+
+To measure its performance using the configured evaluation metrics and understand how well it predicts the target labels in the supplied dataset.
+
+Important limitation: Your code evaluates the model on the same examples used for training. To measure generalization more reliably, we would need a separate test dataset.
+Part 10: Plotting the Training Loss Graph
+Q33. Explain the loss graph code.
+Your code is:
+plt.plot(history.history['loss'])plt.title('CBOW Model Loss')plt.xlabel('Epochs')plt.ylabel('Loss')plt.show()
+
+
+Let's explain each line.
+Line 1
+plt.plot(history.history['loss'])
+
+
+This plots the loss recorded during each epoch.
+
+The values come from the History object created by:
+history = model.fit(X, Y, epochs=100, verbose=1)
+
+
+Since you trained for 100 epochs, the graph contains 100 loss measurements.
+Line 2
+plt.title('CBOW Model Loss')
+
+
+This sets the graph's title to:
+CBOW Model Loss
+
+Line 3
+plt.xlabel('Epochs')
+
+
+This labels the horizontal axis as Epochs.
+
+It represents training progress.
+Line 4
+plt.ylabel('Loss')
+
+
+This labels the vertical axis as Loss.
+
+It represents the model's prediction error according to the selected loss function.
+Line 5
+plt.show()
+
+
+This displays the graph.
+Q34. How do you interpret the graph?
+Your loss graph shows a general downward trend as training progresses.
+
+You can interpret it as follows:
+- X-axis: Number of training epochs.
+- Y-axis: Training loss.
+- Downward curve: The model is generally improving its predictions on the training data.
+- Flat curve: The model's loss is changing very little, suggesting that learning may have slowed.
+- Increasing curve: The model's predictions are getting worse according to the loss metric, at least over that portion of training.
+Viva question: What should an ideal training loss graph look like?
+
+Ideally, the training loss decreases and eventually stabilizes at a relatively low value.
+
+However, a decreasing training loss alone does not prove that a model performs well on unseen data.
+
+Viva question: Why do we visualize training loss?
+
+To understand how the model's error changes over time and to identify whether training appears to be progressing.
+Part 11: Predicting a Target Word
+This is the final and most interesting part of your practical: giving the model context words and asking it to predict the missing word.
+Q35. Explain the prediction code line by line.
+Your code is:
+context = X[0].reshape(1, 4)prediction = model.predict(context, verbose=0)predicted_index = np.argmax(prediction)predicted_word = tokenizer.index_word.get(    predicted_index, "Unknown")actual_word = tokenizer.index_word.get(    Y[0], "Unknown")print("Context words:")for index in X[0]:    print(tokenizer.index_word.get(index, "Unknown"))print("Actual target word:", actual_word)print("Predicted target word:", predicted_word)
+
+
+Let's break it down carefully.
+Line 1: context = X[0].reshape(1, 4)
+This selects the first training example from X and reshapes it into a two-dimensional array.
+
+Let's examine both operations.
+
+First:
+X[0]
+
+
+This selects the first row of X.
+
+Your first row is:
+[3, 1, 6, 38]
+
+Using the word index, these IDs correspond to:
+deep, learning, a, branch
+
+Second:
+.reshape(1, 4)
+
+
+This reshapes the four word IDs into an array containing one example with four context words.
+
+The shape changes from:
+(4,)
+
+to:
+(1, 4)
+
+Why?
+
+Because the model expects a batch of examples, even when we want to predict only one example.
+
+Here:
+- 1 means one example.
+- 4 means four context words.
+Line 2: prediction = model.predict(context, verbose=0)
+This passes the context into the trained neural network.
+
+The model processes the context embeddings and calculates scores for all possible word IDs.
+
+Because the vocabulary size is 85, the prediction has a shape of:
+(1, 85)
+
+This means one input example and 85 output scores.
+
+verbose=0 suppresses the prediction progress display.
+Line 3: predicted_index = np.argmax(prediction)
+Question: What does np.argmax() do?
+
+Answer:
+
+It returns the index of the largest value in an array.
+
+Suppose the model produces these example probabilities:
+Word A: 0.10
+Word B: 0.20
+Word C: 0.70
+
+The highest value is 0.70, belonging to Word C.
+
+Therefore:
+np.argmax(prediction)
+
+
+returns the index of Word C.
+
+In your code, it selects the word ID with the highest predicted score.
+Lines 4–6: Finding the predicted word
+predicted_word = tokenizer.index_word.get(    predicted_index, "Unknown")
+
+
+Let's break this down.
+
+tokenizer.index_word is the reverse mapping of tokenizer.word_index.
+
+For example:
+tokenizer.word_index
+
+
+maps words to IDs:
+{"deep": 3, "is": 11}
+
+
+Whereas:
+tokenizer.index_word
+
+
+maps IDs back to words:
+{3: "deep", 11: "is"}
+
+
+The .get() method looks up the predicted ID.
+
+If that ID does not exist in the dictionary, the code returns "Unknown" instead.
+
+Therefore, the model's numerical prediction is converted into a readable word.
+Lines 7–9: Finding the actual target word
+actual_word = tokenizer.index_word.get(    Y[0], "Unknown")
+
+
+This retrieves the actual target word associated with the first training example.
+
+Remember:
+Y[0]
+
+
+contains the target ID for the first context.
+
+Your first target ID is:
+11
+
+According to the word index:
+11 → is
+
+Therefore:
+actual_word = "is"
+
+
+Lines 10–11: Printing the context heading
+print("Context words:")
+
+
+This prints a heading before displaying the context words.
+Lines 12–13: Displaying the context words
+for index in X[0]:    print(tokenizer.index_word.get(index, "Unknown"))
+
+
+The loop iterates over the four IDs in the first context.
+
+For each ID:
+1. It looks up the corresponding word.
+2. It prints the word.
+For your first example:
+3  → deep
+1  → learning
+6  → a
+38 → branch
+
+Lines 14–15: Displaying the result
+print("Actual target word:", actual_word)print("Predicted target word:", predicted_word)
+
+
+These statements display the correct target word and the word predicted by the model.
+Q36. What is the output of the prediction code?
+Your notebook produces:
+Context words:
+deep
+learning
+a
+branch
+Actual target word: is
+Predicted target word: is
+
+Let's understand this result.
+Item	Value	Meaning
+First context word	deep	A word supplied to the model
+Second context word	learning	A word supplied to the model
+Third context word	a	A word supplied to the model
+Fourth context word	branch	A word supplied to the model
+Actual target	is	The correct answer in the training data
+Predicted target	is	The model's predicted answer
+
+
+The model correctly predicts the target word for this particular example.
+
+Does this mean the model is 100% accurate?
+
+No.
+
+It means that this one prediction is correct. The overall training accuracy is approximately 62.42%, so other training examples may still be predicted incorrectly.
+
+Viva question: Why do we use argmax()?
+
+To select the index with the highest predicted score, which corresponds to the model's chosen target word.
+
+Viva question: Why do we use tokenizer.index_word?
+
+To convert the predicted numerical word ID back into a readable word.
+
+Viva question: Why do we use .get(index, "Unknown")?
+
+To return the corresponding word when the index exists, or "Unknown" when it does not.
+Part 12: Complete CBOW Model Architecture
+Now let's connect everything you have learned.
+Q37. Can you explain the complete architecture of your CBOW model?
+Answer:
+
+Your neural network follows this structure:
+           INPUT
+      Four context words
+       [3, 1, 6, 38]
+              |
+              v
+      EMBEDDING LAYER
+       85 possible IDs
+      10 numbers per word
+              |
+              v
+        LAMBDA LAYER
+      Average 4 embeddings
+              |
+              v
+         DENSE LAYER
+        64 neurons
+        ReLU activation
+              |
+              v
+         OUTPUT LAYER
+        85 output scores
+       Softmax activation
+              |
+              v
+      PREDICTED WORD
+             "is"
+
+Let's summarize the dimensions.
+Stage	Output shape for one example	Purpose
+Input	(1, 4)	Four context-word IDs
+Embedding	(1, 4, 10)	Ten-dimensional vector for each word
+Lambda	(1, 10)	Average of the four word vectors
+Dense	(1, 64)	Learn useful combinations of features
+Output Dense	(1, 85)	Score all possible vocabulary IDs
+
+
+The shapes describe the data as it flows through the network.
+
+Important: These are the conceptual tensor shapes for one example. The model processes the same architecture in batches during training.
+Part 13: Most Important CBOW Viva Questions and Answers
+Here are the questions I recommend preparing first for your practical examination.
+A. Basic Concepts
+Q38. What is the full form of CBOW?
+Answer: Continuous Bag of Words.
+Q39. What is the main objective of CBOW?
+Answer: To predict a target word from its surrounding context words.
+Q40. What is Word2Vec?
+Answer: Word2Vec is a technique for learning numerical vector representations of words based on their surrounding words.
+Q41. What are the two architectures of Word2Vec?
+Answer:
+1. CBOW.
+2. Skip-gram.
+Q42. Differentiate between CBOW and Skip-gram.
+Answer: CBOW predicts a target word from surrounding context words, whereas Skip-gram predicts surrounding words from a target word.
+Q43. What is a word embedding?
+Answer: A word embedding is a numerical vector representing a word in a learned vector space.
+Q44. What is NLP?
+Answer: Natural Language Processing is a field of AI that enables computers to process and work with human language.
+Q45. What is a vocabulary?
+Answer: A vocabulary is the collection of unique words recognized by the tokenizer in the dataset.
+Q46. Why must text be converted into numbers?
+Answer: Neural networks perform mathematical operations on numerical data. Tokenization provides numerical IDs for the words.
+B. Data Preparation
+Q47. Why do we convert text to lowercase?
+Answer: To reduce differences between uppercase and lowercase versions of the same word.
+Q48. What does a tokenizer do?
+Answer: It identifies words in the text and maps them to numerical IDs.
+Q49. What is word_index?
+Answer: It is a dictionary mapping words to their numerical IDs.
+Q50. What is index_word?
+Answer: It is the reverse mapping from numerical IDs to words.
+Q51. What is vocab_size in your program?
+Answer: It is 85, including the reserved index 0 and the 84 unique words in the vocabulary.
+Q52. What is a context window?
+Answer: It is the group of surrounding words used to predict a target word.
+Q53. What is the window size in your program?
+Answer: The window size is 2, meaning up to two words on each side of the target are selected.
+Q54. What are X and Y?
+Answer:
+- X contains the context-word IDs.
+- Y contains the corresponding target-word IDs.
+Q55. Why do we use np.array()?
+Answer: To convert the training lists into numerical arrays suitable for model training.
+C. Neural Network
+Q56. Why do we use TensorFlow?
+Answer: To implement and train the neural network and perform numerical computations.
+Q57. What is Keras?
+Answer: Keras is a high-level deep learning API that provides a convenient way to build and train neural networks.
+Q58. Why do we use Sequential()?
+Answer: To create a model consisting of layers stacked one after another.
+Q59. What is the purpose of the Embedding layer?
+Answer: It converts word IDs into learnable numerical vectors.
+Q60. What is the embedding dimension in your program?
+Answer: 10.
+Q61. Why do we use a Lambda layer?
+Answer: To apply a custom operation. In this program, it averages the context-word embeddings.
+Q62. What does axis=1 mean in tf.reduce_mean()?
+Answer: It specifies that the mean should be calculated across the four context positions in the embedded input.
+Q63. What is a Dense layer?
+Answer: A fully connected neural network layer in which each neuron receives input from all outputs of the preceding layer.
+Q64. How many neurons are in your hidden Dense layer?
+Answer: 64.
+Q65. What is ReLU?
+Answer: ReLU stands for Rectified Linear Unit. It returns the input when the input is positive and zero when it is negative.
+Q66. What is Softmax?
+Answer: Softmax converts output scores into a probability distribution over the possible target classes.
+Q67. Why does the final layer have 85 outputs?
+Answer: Because the vocabulary has 85 possible indices, including index 0.
+D. Training and Evaluation
+Q68. What is an epoch?
+Answer: One complete pass through the training dataset.
+Q69. What does model.fit() do?
+Answer: It trains the model by processing the training examples and updating the model's weights.
+Q70. What is loss?
+Answer: Loss measures the error between the model's predictions and the correct target labels.
+Q71. What is an optimizer?
+Answer: An optimizer adjusts the model's weights to reduce the loss.
+Q72. Which optimizer does your program use?
+Answer: Adam.
+Q73. What is sparse categorical cross-entropy?
+Answer: It is a loss function for classification problems in which the correct class is represented by an integer label.
+Q74. What is accuracy?
+Answer: Accuracy is the proportion of predictions that match the correct labels.
+Q75. What is the training accuracy reported by your evaluation code?
+Answer: Approximately 62.42%.
+Q76. Why is the loss graph important?
+Answer: It shows how the training loss changes across epochs, helping us understand whether the model is learning patterns from the training data.
+Q77. What does np.argmax() do?
+Answer: It returns the index of the largest value in the prediction array.
+Q78. Why do we evaluate the model?
+Answer: To measure its performance using the configured evaluation metrics.
+Q79. Is your evaluation performed on unseen data?
+Answer: No. Your code evaluates the model using the same X and Y arrays used for training.
+Q80. What is the main limitation of your implementation?
+Answer: It uses a small text dataset, does not evaluate performance on a separate test set, and can create context windows that cross sentence boundaries.
+Part 14: Explain Your Practical to the Examiner
+If your examiner asks you to explain the entire experiment, you can use the following answer.
+Aim: To implement the Continuous Bag of Words (CBOW) model using TensorFlow and Keras.
+
+Theory:
+
+CBOW is a Word2Vec architecture used in Natural Language Processing. It predicts a target word using its surrounding context words.
+
+Procedure:
+1. Import the required Python libraries, including NumPy, TensorFlow, Matplotlib, and Keras.
+2. Prepare a text dataset containing sentences related to Machine Learning and Deep Learning.
+3. Convert the text to lowercase and tokenize the words.
+4. Assign numerical IDs to unique words using the Keras Tokenizer.
+5. Calculate the vocabulary size.
+6. Generate context-target pairs using a window size of 2.
+7. Convert the context and target lists into NumPy arrays.
+8. Create a Sequential neural network containing an Embedding layer, a Lambda layer, a hidden Dense layer with 64 neurons, and an output Dense layer with Softmax activation.
+9. Compile the model using sparse categorical cross-entropy, the Adam optimizer, and accuracy as a metric.
+10. Train the model for 100 epochs.
+11. Evaluate the model and plot the training loss.
+12. Predict a target word using the first context example and compare the prediction with the actual target.
+Result:
+
+The CBOW model was implemented and trained successfully. The evaluation on the training data reported a loss of approximately 1.6162 and an accuracy of approximately 62.42%. For the first context example, the model correctly predicted the target word is.
+
+
+
+Part 15: Final Revision — Memorize These 10 Points
+If you have limited time before your viva, prioritize these points.
+No.	Question	Answer to remember
+1	What is CBOW?	Predicts a target word from context words.
+2	What is the window size?	2 words on each side.
+3	How many context words are used?	4 words per example.
+4	What is the vocabulary size?	85, including index 0.
+5	What is the embedding dimension?	10.
+6	How many hidden Dense neurons are used?	64.
+7	Which activation functions are used?	ReLU in the hidden layer and Softmax in the output layer.
+8	Which optimizer is used?	Adam.
+9	How many epochs are used?	100.
+10	What is the final evaluated training accuracy?	Approximately 62.42%.
+
+
+One last thing to understand
+Sanika, you don't need to memorize every line blindly. Focus on understanding the flow:
+
+Text → Tokenization → Numerical IDs → Context-target pairs → Embeddings → Neural network training → Evaluation → Word prediction.
+
+If you understand why each stage exists, you will be able to explain the code even if the examiner asks you questions in a different order.
+
+And remember these three distinctions:
+- CBOW predicts a word from its context.
+- Training teaches the model by updating its weights.
+- Prediction uses the trained model to select the most likely target word.
+That is the foundation of your entire practical.
+
+
+
+
+
+
+
+
+Is this conversation helpful so far?

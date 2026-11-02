@@ -1,0 +1,1764 @@
+Part 1: Understanding the Basics Before the Code
+Q1. What is Artificial Intelligence (AI)?
+Answer:
+
+Artificial Intelligence is a branch of computer science that enables machines to perform tasks that usually require human intelligence.
+
+For example:
+- Recognizing faces in photographs.
+- Understanding spoken language.
+- Recommending movies.
+- Recognizing handwritten digits.
+Simple example: When your phone recognizes your face to unlock itself, it uses AI techniques.
+Q2. What is Machine Learning (ML)?
+Answer:
+
+Machine Learning is a branch of AI in which computers learn patterns from data and use those patterns to make predictions.
+
+In traditional programming, we provide the rules explicitly. In Machine Learning, we provide examples and allow the algorithm to learn patterns from them.
+
+Example:
+
+Suppose we want a computer to recognize handwritten digit 5.
+
+Instead of manually writing every rule describing the shape of the digit 5, we provide thousands of images of handwritten digits along with their correct labels.
+
+The computer learns patterns from these examples.
+
+Later, when we give it a new handwritten digit, it predicts which digit it represents.
+Q3. What is Deep Learning (DL)?
+Answer:
+
+Deep Learning is a subset of Machine Learning that uses artificial neural networks with multiple layers to learn patterns from data.
+
+Think of it like this:
+- AI: The broad field of making machines intelligent.
+- ML: A way for machines to learn from data.
+- DL: A way of learning using neural networks with multiple layers.
+Deep Learning is particularly useful for images, speech, text, and other complex data.
+Q4. What is an Artificial Neural Network (ANN)?
+Answer:
+
+An Artificial Neural Network is a computing model inspired by the way biological neurons process information.
+
+It consists of interconnected units called neurons, arranged into layers.
+
+A simple neural network has three types of layers:
+1. Input layer: Receives the input data.
+2. Hidden layer: Learns useful patterns from the input.
+3. Output layer: Produces the final prediction.
+For your experiment, imagine providing an image of a handwritten 7.
+- The input layer receives the image's pixel values.
+- The hidden layer learns patterns such as edges, lines, and shapes.
+- The output layer estimates which digit the image represents.
+The network learns by adjusting its internal numerical values during training.
+Q5. What is a Feedforward Neural Network?
+Answer:
+
+A Feedforward Neural Network is an artificial neural network in which information moves in one direction: from the input layer, through the hidden layers, to the output layer.
+
+There are no feedback connections carrying the output back into earlier layers as part of the network's forward path.
+
+Your experiment uses a feedforward neural network with one hidden layer.
+
+The architecture is:
+
+Input image → Flatten layer → Hidden layer → Output layer
+Q6. What is MNIST?
+Answer:
+
+MNIST stands for Modified National Institute of Standards and Technology.
+
+It is a widely used dataset containing images of handwritten digits from 0 to 9.
+
+The dataset contains:
+Feature	Description
+Total training images	60,000
+Total testing images	10,000
+Image dimensions	28 × 28 pixels
+Number of classes	10
+Possible digit labels	0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+Task	Handwritten digit classification
+
+
+Each image is grayscale, meaning each pixel represents a shade between black and white.
+
+The goal is to train a model that can correctly recognize the digit shown in an image.
+Q7. What is the difference between training data and testing data?
+Answer:
+
+Training data is used to teach the neural network.
+
+Testing data is used to evaluate how well the trained network performs on images it was not trained on.
+
+Think of a college examination:
+- Training data is like the questions you practise while studying.
+- Testing data is like a new question paper used to check your understanding.
+For MNIST:
+- Training images: 60,000.
+- Testing images: 10,000.
+Keeping testing data separate helps us assess whether the model can recognize new examples instead of simply memorizing its training data.
+Part 2: Importing the Required Libraries
+Q8. What is a library in Python?
+Answer:
+
+A library is a collection of prewritten code that we can use instead of implementing everything ourselves.
+
+For example, if we want to train a neural network, we don't have to write all the mathematical operations from scratch. We can use libraries such as TensorFlow and Keras.
+Your code
+import tensorflow as tffrom tensorflow import kerasimport matplotlib.pyplot as pltimport random
+
+
+Let's understand each line.
+Q9. What does import tensorflow as tf mean?
+Answer:
+import tensorflow as tf
+
+
+- import tells Python to load a library.
+- tensorflow is the name of the library.
+- as tf gives the library a short name, tf.
+TensorFlow is an open-source library used to build and train Machine Learning and Deep Learning models.
+
+Instead of writing:
+tensorflow.keras.datasets.mnist
+
+
+we can write:
+tf.keras.datasets.mnist
+
+
+Why do we use TensorFlow?
+
+We use TensorFlow to perform the computations required to build and train our neural network.
+
+Viva question: What is TensorFlow?
+
+TensorFlow is an open-source library developed by Google for numerical computation and building and training Machine Learning and Deep Learning models.
+Q10. What does from tensorflow import keras mean?
+Answer:
+from tensorflow import keras
+
+
+This imports Keras from TensorFlow.
+
+Keras provides a simpler, high-level interface for building neural networks.
+
+For example, we can create a neural network using:
+keras.Sequential()
+
+
+We don't have to manually implement every neuron and connection.
+
+Viva question: What is Keras?
+
+Keras is a high-level Deep Learning API that simplifies the process of building, training, and evaluating neural networks. In this experiment, we use Keras through TensorFlow.
+
+Remember the difference:
+- TensorFlow provides the underlying computational framework.
+- Keras provides a convenient interface for defining neural networks.
+Q11. What does import matplotlib.pyplot as plt mean?
+Answer:
+import matplotlib.pyplot as plt
+
+
+Matplotlib is a Python library used for creating graphs and visualizations.
+
+pyplot is a module within Matplotlib.
+
+plt is its short name.
+
+We use it to:
+- Display handwritten digit images.
+- Plot training loss.
+- Plot training accuracy.
+- Display other graphs.
+For example:
+plt.show()
+
+
+displays a graph or image.
+
+Viva question: Why do we use Matplotlib?
+
+We use Matplotlib to visualize the dataset and plot the training loss and accuracy of the neural network.
+Q12. What does import random mean?
+Answer:
+import random
+
+
+This imports Python's built-in random module.
+
+It allows us to generate random values.
+
+Later, your code uses it to select a random test image:
+n = random.randint(0, 9999)
+
+
+This selects a random integer between 0 and 9999, inclusive.
+
+Viva question: Why is the random module used?
+
+It is used to select a random test image for visualization.
+Part 3: Loading the MNIST Dataset
+Q13. What is a dataset?
+Answer:
+
+A dataset is a collection of data used to train or test a Machine Learning model.
+
+In our experiment, the dataset contains images of handwritten digits and the correct digit labels for those images.
+
+For example:
+Image	Correct label
+Image of handwritten zero	0
+Image of handwritten three	3
+Image of handwritten seven	7
+Image of handwritten nine	9
+
+
+The image is the input, and its correct digit is the label.
+
+The model learns to associate image patterns with their corresponding labels.
+Q14. Explain the dataset-loading code line by line.
+Your code
+mnist = tf.keras.datasets.mnist(x_train, y_train), (x_test, y_test) = mnist.load_data()x_train = x_train.astype("float32") / 255.0x_test = x_test.astype("float32") / 255.0print(x_train.shape, y_train.shape)
+
+
+Line 1
+mnist = tf.keras.datasets.mnist
+
+
+This accesses the MNIST dataset provided by TensorFlow's Keras datasets module and assigns it to the variable mnist.
+
+Think of mnist as a convenient reference that lets us load this particular dataset.
+Line 2
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+
+This is one of the most important lines in your experiment.
+
+Let's break it down.
+
+What does load_data() do?
+
+It loads the MNIST dataset and divides it into training and testing sets.
+
+The function returns four arrays.
+Variable	Meaning	Size
+x_train	Training images	60,000 images
+y_train	Correct labels for training images	60,000 labels
+x_test	Testing images	10,000 images
+y_test	Correct labels for testing images	10,000 labels
+
+
+What does the letter x represent?
+
+x represents the input data—in our case, the images.
+
+What does the letter y represent?
+
+y represents the target values or correct answers—in our case, the digit labels.
+
+For example, if a training image contains the digit 7, its corresponding label might be:
+y_train[0] = 7
+
+
+The actual value depends on which image we are accessing.
+
+What do the parentheses mean?
+(x_train, y_train), (x_test, y_test)
+
+
+They unpack the four returned arrays into four separate variables.
+
+The first pair contains the training data. The second pair contains the testing data.
+
+Viva question: What is the purpose of load_data()?
+
+It loads the MNIST handwritten digit dataset and returns the training images, training labels, testing images, and testing labels.
+Line 3
+x_train = x_train.astype("float32") / 255.0
+
+
+This line performs two operations.
+
+Operation 1:
+x_train.astype("float32")
+
+
+This converts the training image values into 32-bit floating-point numbers.
+
+A floating-point number can contain a decimal component.
+
+For example:
+5     → 5.0
+128   → 128.0
+255   → 255.0
+
+Why do we do this?
+
+Neural networks perform calculations using numerical values, and float32 is a common data type for these computations.
+
+Operation 2:
+/ 255.0
+
+
+This divides every pixel value by 255.
+
+Why 255?
+
+Each original MNIST grayscale pixel has a value between 0 and 255:
+- 0 represents black.
+- 255 represents white.
+- Values between them represent shades of gray.
+After dividing by 255, the pixel values fall between 0 and 1.
+
+For example:
+Original pixel value	Value after normalization
+0	0.0
+64	Approximately 0.251
+128	Approximately 0.502
+192	Approximately 0.753
+255	1.0
+
+
+This process is called normalization.
+
+What is normalization?
+
+Normalization is the process of adjusting numerical data to a particular scale.
+
+In this experiment, we scale pixel values from 0–255 to 0–1.
+
+Why is normalization important?
+
+It helps keep the input values within a consistent range, which generally makes neural network training easier and more stable.
+Line 4
+x_test = x_test.astype("float32") / 255.0
+
+
+This performs the same normalization on the testing images.
+
+It is important to apply the same preprocessing to training and testing images so that the model receives data in a consistent format.
+
+Viva question: Why do we divide pixel values by 255?
+
+We divide by 255 to normalize pixel values from the range 0–255 to the range 0–1.
+Line 5
+print(x_train.shape, y_train.shape)
+
+
+This prints the shapes of the training image array and the training label array.
+What is the output?
+(60000, 28, 28) (60000,)
+
+Let's understand this output.
+
+First output:
+(60000, 28, 28)
+
+This belongs to x_train.
+- 60000: There are 60,000 training images.
+- 28: Each image has 28 rows of pixels.
+- 28: Each image has 28 columns of pixels.
+Therefore, each image contains:
+
+28 × 28 = 784 pixels.
+
+Second output:
+(60000,)
+
+This belongs to y_train.
+
+It means there are 60,000 labels, one for each training image.
+
+The comma indicates that the array has one dimension.
+Q15. Why do we use .shape?
+Answer:
+
+The .shape attribute tells us the dimensions of an array.
+
+For example:
+x_train.shape
+
+
+returns:
+(60000, 28, 28)
+
+It helps us verify that the dataset has been loaded correctly.
+Q16. What is the output of all four shape statements?
+Your code is:
+print(x_train.shape)print(y_train.shape)print(x_test.shape)print(y_test.shape)
+
+
+The output is:
+(60000, 28, 28)
+(60000,)
+(10000, 28, 28)
+(10000,)
+
+Explanation:
+Output	Meaning
+(60000, 28, 28)	60,000 training images, each 28 × 28
+(60000,)	60,000 training labels
+(10000, 28, 28)	10,000 testing images, each 28 × 28
+(10000,)	10,000 testing labels
+
+
+Viva question: Why are the numbers of images and labels equal?
+
+Every image has one corresponding correct label. Therefore, there must be 60,000 training labels for 60,000 training images and 10,000 testing labels for 10,000 testing images.
+Part 4: Visualizing a Handwritten Digit
+Q17. Why do we visualize the dataset?
+Answer:
+
+Visualization allows us to see what the input data looks like before training the model.
+
+It helps us confirm that the dataset contains the expected handwritten digit images.
+Your code
+plt.matshow(x_train[1])
+
+
+Let's break it down.
+What is x_train[1]?
+Python indexing starts at zero.
+
+Therefore:
+- x_train[0] refers to the first training image.
+- x_train[1] refers to the second training image.
+- x_train[2] refers to the third training image.
+So, x_train[1] selects the second training image.
+What does plt.matshow() do?
+It displays a two-dimensional array as an image.
+
+Because each MNIST image is represented by a 28 × 28 array of pixel values, plt.matshow() can display it directly.
+What is the output?
+A visual representation of the second training image appears.
+
+The image shows a handwritten digit in grayscale, using the default color mapping of Matplotlib.
+
+Important: The exact digit depends on the selected image. The digit shown in the image is not necessarily the same every time you choose a different index.
+
+Viva question: Why do we use plt.matshow()?
+
+We use plt.matshow() to visualize a two-dimensional array, such as a handwritten digit image from the MNIST dataset.
+Part 5: Building the Feedforward Neural Network
+This is the most important part of your experiment. Make sure you understand these lines well.
+Q18. What is model architecture?
+Answer:
+
+Model architecture describes how the layers of a neural network are arranged and connected.
+
+Your model contains three layers:
+1. Flatten layer.
+2. Dense hidden layer with 128 neurons.
+3. Dense output layer with 10 neurons.
+The code is:
+model = keras.Sequential([    keras.layers.Flatten(input_shape=(28,28)),    keras.layers.Dense(128, activation='relu'),    keras.layers.Dense(10, activation='softmax')])model.summary()
+
+
+Let's understand each line.
+Q19. What does model = keras.Sequential([...]) mean?
+model = keras.Sequential([
+
+
+Answer:
+
+keras.Sequential() creates a neural network in which layers are arranged in sequence.
+
+The output from one layer becomes the input to the next layer.
+
+The layers are processed in the order in which they appear in the list.
+
+In our model:
+Input image
+    ↓
+Flatten layer
+    ↓
+Dense layer with 128 neurons
+    ↓
+Dense layer with 10 neurons
+    ↓
+Predicted digit
+
+The variable model stores the neural network we are creating.
+
+Viva question: What is a Sequential model?
+
+A Sequential model is a Keras model in which layers are arranged one after another in a linear sequence.
+Q20. What is the Flatten layer?
+Your code:
+keras.layers.Flatten(input_shape=(28,28)),
+
+
+Answer:
+
+The Flatten layer converts a multidimensional input into a one-dimensional array.
+
+Remember, every MNIST image has dimensions of 28 × 28.
+
+That means the image is initially represented as 28 rows and 28 columns.
+
+However, the Dense layer in this model expects a one-dimensional vector for each image.
+
+Flatten converts:
+28 × 28 image
+      ↓
+784 pixel values in a single vector
+
+Because:
+
+28 × 28 = 784.
+
+The Flatten layer does not learn patterns or change the pixel values. It simply changes their arrangement.
+What does input_shape=(28,28) mean?
+It tells the Flatten layer that each input image has a height of 28 pixels and a width of 28 pixels.
+
+The shape describes one image, not the entire dataset.
+
+Viva question: Why is Flatten used in this experiment?
+
+Flatten converts each 28 × 28 image into a one-dimensional vector of 784 values so that it can be processed by the Dense layer.
+
+Viva question: Does Flatten have trainable parameters?
+
+No. Flatten only reshapes the input data, so it has zero trainable parameters.
+Q21. What is a Dense layer?
+Your code:
+keras.layers.Dense(128, activation='relu'),
+
+
+Answer:
+
+A Dense layer is a fully connected neural network layer.
+
+This means every neuron in the Dense layer receives input from every value in the preceding layer.
+
+Your first Dense layer contains 128 neurons.
+
+Let's understand the arguments.
+What does 128 mean?
+Dense(128, ...)
+
+
+It specifies the number of neurons in this layer.
+
+The layer receives 784 input values from Flatten and produces 128 output values.
+
+These 128 neurons learn patterns that may help distinguish different handwritten digits.
+
+For example, the network may learn useful combinations of pixel patterns associated with curves, edges, or lines.
+
+However, individual neurons do not necessarily correspond to a specific human-interpretable feature.
+What is an activation function?
+An activation function transforms the output calculated by a neuron.
+
+It helps a neural network learn complex patterns.
+
+Your hidden layer uses the ReLU activation function.
+What is ReLU?
+ReLU stands for Rectified Linear Unit.
+
+It is defined as:
+\[
+\operatorname{ReLU}(x)=\max(0,x)
+\]
+In simple words:
+- If the input is negative, ReLU returns 0.
+- If the input is positive, ReLU returns that input.
+Examples:
+Input	ReLU output
+-5	0
+-1	0
+0	0
+3	3
+8	8
+
+
+Why do we use ReLU?
+
+ReLU introduces non-linearity, allowing the network to learn more complex patterns than a network made only of linear transformations.
+
+Viva question: What is ReLU?
+
+ReLU is an activation function that returns zero for negative inputs and the input itself for positive inputs.
+Q22. Explain the output Dense layer.
+Your code:
+keras.layers.Dense(10, activation='softmax')
+
+
+Answer:
+
+This is the final layer of the neural network.
+
+It contains 10 neurons because the MNIST dataset has 10 possible digit classes:
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+
+Each output neuron corresponds to one digit class.
+
+The layer produces 10 scores, and the softmax activation converts them into probability-like values that sum to 1.
+
+For example, a model might produce:
+Digit	Predicted probability
+0	0.01
+1	0.02
+2	0.01
+3	0.03
+4	0.01
+5	0.02
+6	0.01
+7	0.86
+8	0.02
+9	0.01
+
+
+These are illustrative values, not the actual output of your model.
+
+In this example, digit 7 has the highest probability, so the model predicts 7.
+What is Softmax?
+Softmax is an activation function commonly used in the output layer of a multiclass classification model.
+
+It converts the output scores into values that sum to 1 and can be interpreted as the model's estimated probabilities for each class.
+
+Viva question: Why do we use Softmax in the output layer?
+
+We use Softmax to produce a probability distribution over the 10 possible digit classes.
+Q23. What does model.summary() do?
+model.summary()
+
+
+Answer:
+
+It displays a summary of the neural network, including:
+- Layer names.
+- Layer types.
+- Output shapes.
+- Number of parameters.
+Your output is approximately:
+Model: "sequential"
+
+Layer (type)    Output Shape    Param #
+Flatten         (None, 784)     0
+Dense           (None, 128)     100,480
+Dense_1         (None, 10)      1,290
+
+Total params: 101,770
+Trainable params: 101,770
+Non-trainable params: 0
+
+Let's understand what these values mean.
+What does None mean in the output shape?
+For example:
+(None, 784)
+
+None represents the batch dimension, which is not fixed when the model is defined.
+
+It means the model can process a variable number of images in a batch.
+
+784 represents the number of values in each flattened image.
+How are 100,480 parameters calculated?
+The first Dense layer receives 784 input values and contains 128 neurons.
+
+Each neuron has one weight for every input and one bias.
+
+Therefore:
+\[
+\text{Parameters}=(\text{Inputs}\times\text{Neurons})+\text{Neurons}
+\]
+Substituting the values:
+\[
+=(784\times128)+128
+\]
+\[
+=100,352+128
+\]
+\[
+=\boxed{100,480}
+\]
+How are 1,290 parameters calculated?
+The output layer receives 128 inputs and contains 10 neurons.
+\[
+\text{Parameters}=(128\times10)+10
+\]
+\[
+=1,280+10
+\]
+\[
+=\boxed{1,290}
+\]
+What is the total number of parameters?
+The Flatten layer has zero trainable parameters.
+
+Therefore:
+\[
+100,480+1,290=\boxed{101,770}
+\]
+These parameters consist of weights and biases that the model learns during training.
+
+Viva question: What are weights and biases?
+
+Weights determine how strongly inputs influence a neuron. Biases provide an additional adjustable value to the neuron's calculation.
+
+Both are learned during training.
+
+Viva question: What are trainable parameters?
+
+Trainable parameters are values, such as weights and biases, that the neural network adjusts during training to reduce prediction errors.
+
+One additional point: Your notebook later displays 101,772 total parameters after a training step. This can happen because Keras includes two additional optimizer-state parameters in that later summary. The model itself still has 101,770 trainable weights and biases.
+Part 6: Compiling the Neural Network
+Q24. What does compiling a model mean?
+Answer:
+
+Before training, we need to specify how the model should learn, how its prediction errors should be measured, and how its performance should be evaluated.
+
+This is done using model.compile().
+Your code
+model.compile(    optimizer='sgd',    loss='sparse_categorical_crossentropy',    metrics=['accuracy'])
+
+
+Let's understand each argument.
+Q25. What is an optimizer?
+Answer:
+
+An optimizer is an algorithm that updates the model's weights and biases during training to help reduce prediction errors.
+
+Imagine that your model predicts the digit 3 when the actual digit is 8.
+
+The model has made a mistake.
+
+The training process calculates how wrong the prediction is and uses that information to adjust the model's parameters.
+
+The optimizer helps perform these adjustments.
+What does optimizer='sgd' mean?
+optimizer='sgd'
+
+
+SGD stands for Stochastic Gradient Descent.
+
+It is an optimization algorithm used to update the weights and biases of a neural network.
+
+In simple terms, SGD uses information about the loss gradient to decide how to adjust the model's parameters.
+
+Think of it as a student correcting mistakes after receiving feedback.
+
+The model repeatedly makes predictions, receives information about its errors, and adjusts its parameters to improve.
+
+Viva question: Why do we use SGD?
+
+We use SGD to update the weights and biases of the neural network in a direction intended to reduce the loss.
+Q26. What is loss?
+Answer:
+
+Loss is a numerical measure of how incorrect the model's predictions are according to a specified loss function.
+
+Generally, a lower loss indicates better predictions, although loss must be interpreted alongside other measures.
+
+For example:
+- Higher loss: The predictions may be far from the desired results.
+- Lower loss: The predictions generally agree better with the correct labels.
+Loss is not the same as accuracy.
+
+A model can classify many images correctly but still have a relatively high loss if its predicted probabilities are poor.
+What does sparse_categorical_crossentropy mean?
+loss='sparse_categorical_crossentropy'
+
+
+Let's break this name down.
+- Sparse: The correct labels are represented as integers.
+- Categorical: The task involves choosing among multiple classes.
+- Cross-entropy: A loss function that measures how well the predicted probability distribution agrees with the correct class.
+Our dataset has 10 classes, representing digits 0 through 9.
+
+The labels are integers, such as:
+0, 3, 7, 9, 2
+
+We do not need to convert each label into a one-hot encoded vector for this loss function.
+
+For example, the label for digit 7 is simply:
+7
+
+
+Viva question: Why do we use sparse categorical cross-entropy?
+
+We use it because this is a multiclass classification problem with integer-encoded labels.
+
+Important: If we used one-hot encoded labels instead, categorical_crossentropy would generally be the appropriate counterpart.
+Q27. What does metrics=['accuracy'] mean?
+Answer:
+metrics=['accuracy']
+
+
+This tells Keras to calculate accuracy while training and evaluating the model.
+
+Accuracy is the proportion of predictions that are correct.
+
+For example, if a model correctly classifies 90 out of 100 images:
+\[
+\text{Accuracy}=\frac{90}{100}\times100
+\]
+\[
+=\boxed{90\%}
+\]
+Viva question: What is the difference between loss and accuracy?
+Loss	Accuracy
+Measures prediction error using a loss function	Measures the proportion of correct predictions
+Generally, lower is better	Generally, higher is better
+Can change even when the predicted class stays the same	Changes when predictions switch between correct and incorrect
+
+
+Part 7: Checking the Model Before Training
+Your notebook contains a few extra statements to check the model.
+Q28. What does this code do?
+print("Trainable variables:", len(model.trainable_variables))print("Training samples:", len(x_train))print("Label samples:", len(y_train))
+
+
+Let's examine each line.
+Line 1
+print("Trainable variables:", len(model.trainable_variables))
+
+
+model.trainable_variables contains the model's trainable variables, such as its weights and biases.
+
+len() counts the number of variables in that collection.
+
+Your output is:
+Trainable variables: 4
+
+Why four?
+
+Your model has two Dense layers.
+
+Each Dense layer has:
+- One weight matrix.
+- One bias vector.
+Therefore:
+Hidden layer: 2 trainable variables
+Output layer: 2 trainable variables
+
+Total: 4 trainable variables
+
+Important distinction: Four trainable variables does not mean four individual numbers. These variables contain a total of 101,770 trainable numerical parameters.
+Line 2
+print("Training samples:", len(x_train))
+
+
+len(x_train) returns the number of training images.
+
+Output:
+Training samples: 60000
+
+Line 3
+print("Label samples:", len(y_train))
+
+
+This counts the number of training labels.
+
+Output:
+Label samples: 60000
+
+This confirms that every training image has a corresponding label.
+Q29. What is model.train_on_batch()?
+Your code:
+model.train_on_batch(x_train[:32], y_train[:32])
+
+
+Answer:
+
+train_on_batch() trains the model on one batch of data.
+
+Let's understand the arguments.
+What does x_train[:32] mean?
+This selects the first 32 training images.
+
+Python slicing excludes the ending index, so [:32] selects indices 0 through 31.
+What does y_train[:32] mean?
+It selects the corresponding first 32 labels.
+What happens when this statement executes?
+The model processes those 32 images, calculates its loss, and updates its weights and biases using the configured optimizer.
+
+The function returns the loss and any requested metrics.
+
+Your notebook shows an output similar to:
+[2.3994, 0.0625]
+
+The first number is the loss, and the second is the accuracy.
+
+An accuracy of 0.0625 corresponds to:
+\[
+0.0625\times100=6.25\%
+\]
+This result is for that particular batch, not for the entire dataset.
+
+Why is the initial accuracy low?
+
+The network starts with randomly initialized weights. At this stage, it has not yet learned the patterns needed to classify handwritten digits reliably.
+Important viva point
+Your notebook executes train_on_batch() before the main training loop. It also executes another train_on_batch() statement later.
+
+Consequently, the model receives two small training updates before the 10-epoch training run begins.
+
+For a clean experiment, these extra batch-training cells are not necessary. You can omit them and proceed directly from model.compile() to model.fit().
+
+This makes the training sequence easier to explain during your viva.
+Part 8: Understanding the Model Summary and Optimizer
+Q30. Explain this code.
+print(model.summary())print("Optimizer:", model.optimizer)print("Loss:", model.loss)print("Metrics:", model.metrics)
+
+
+Line 1
+print(model.summary())
+
+
+model.summary() displays the architecture, layer output shapes, and parameter counts.
+
+However, model.summary() already prints its summary and returns None.
+
+Therefore, using print() around it produces an additional line:
+None
+
+Better version:
+model.summary()
+
+
+Line 2
+print("Optimizer:", model.optimizer)
+
+
+This displays the optimizer configured for the model.
+
+Because you selected SGD, the output identifies an SGD optimizer object.
+Line 3
+print("Loss:", model.loss)
+
+
+This displays the configured loss function:
+Loss: sparse_categorical_crossentropy
+
+Line 4
+print("Metrics:", model.metrics)
+
+
+This displays the metrics that Keras uses to track training and evaluation performance.
+
+Depending on your Keras version, the output may show internal metric objects rather than simply displaying the word accuracy.
+
+That is normal.
+
+Viva question: How can you check the optimizer and loss function?
+
+We can access them through model.optimizer and model.loss.
+Part 9: Training the Neural Network
+This is the main training step.
+Q31. What does training mean in Deep Learning?
+Answer:
+
+Training is the process of teaching a neural network to make better predictions by adjusting its weights and biases based on examples.
+
+In this experiment, the model learns from handwritten digit images and their correct labels.
+
+Training involves repeatedly performing the following operations:
+1. Give images to the network.
+2. Generate predictions.
+3. Calculate the loss.
+4. Compute how the parameters contributed to the loss.
+5. Update the parameters using the optimizer.
+6. Repeat the process.
+The network gradually learns patterns that help it recognize digits.
+Q32. Explain the model.fit() code line by line.
+Your code
+history = model.fit(    x_train, y_train,    validation_data=(x_test, y_test),    epochs=10,    batch_size=32)
+
+
+Line 1
+history = model.fit(
+
+
+model.fit() trains the neural network using the provided data.
+
+The result is stored in the variable history.
+
+The history object contains information recorded during training, including the loss and accuracy for each epoch and the validation metrics.
+
+We can use this information to plot graphs later.
+Line 2
+x_train, y_train,
+
+
+These are the training inputs and their corresponding correct labels.
+
+The model uses them to learn.
+Line 3
+validation_data=(x_test, y_test),
+
+
+This specifies the data used to evaluate the model during training.
+
+In your experiment, the 10,000 test images and their labels are used as validation data.
+
+At the end of each epoch, Keras evaluates the model on this data and reports validation loss and validation accuracy.
+
+An important technical distinction: Your notebook uses the test set as validation data and then evaluates the same set again using model.evaluate(). This is fine for demonstrating the API in a practical, but for a rigorous machine learning experiment, it is better to reserve a separate validation set and keep the test set untouched until the final evaluation.
+Line 4
+epochs=10,
+
+
+An epoch is one complete pass through the training dataset.
+
+Your dataset contains 60,000 training images.
+
+Therefore:
+- Epoch 1: The model processes all 60,000 training images.
+- Epoch 2: It processes all 60,000 training images again.
+- Epoch 3: It repeats the process.
+- This continues until epoch 10.
+The model does not necessarily see each image only once. It sees the training dataset once per epoch.
+
+Viva question: What is an epoch?
+
+An epoch is one complete pass through the entire training dataset.
+Line 5
+batch_size=32
+
+
+This specifies that the model processes 32 training images per batch.
+
+Why use batches?
+
+Processing the entire dataset in a single operation may require a large amount of memory. Dividing the dataset into batches makes training more manageable.
+
+Your dataset has 60,000 training images.
+
+The number of batches per epoch is:
+\[
+\frac{60000}{32}=1875
+\]
+Therefore, each epoch contains 1,875 training steps.
+
+This matches the output in your notebook:
+1875/1875
+
+Viva question: What is batch size?
+
+Batch size is the number of training samples processed in one batch before the training algorithm performs its batch-level parameter update.
+
+Viva question: What is the difference between an epoch and a batch?
+
+An epoch represents one complete pass through the training dataset. A batch represents a smaller group of samples processed during that pass.
+Putting it all together
+Your training statement means:
+Train the neural network on all 60,000 MNIST training images for 10 epochs, processing 32 images per batch, and calculate loss and accuracy on the specified validation data after each epoch.
+
+That is the complete meaning of model.fit() in your experiment.
+Part 10: Understanding the Training Output
+Q33. What output do we get after executing model.fit()?
+Your notebook shows output similar to this:
+Epoch 1/10
+1875/1875 - accuracy: 0.8378 - loss: 0.6342
+             - val_accuracy: 0.9033 - val_loss: 0.3572
+
+Epoch 2/10
+1875/1875 - accuracy: 0.9043 - loss: 0.3406
+             - val_accuracy: 0.9175 - val_loss: 0.2959
+
+Epoch 3/10
+1875/1875 - accuracy: 0.9171 - loss: 0.2924
+             - val_accuracy: 0.9253 - val_loss: 0.2657
+
+...
+
+Epoch 10/10
+1875/1875 - accuracy: 0.9531 - loss: 0.1675
+             - val_accuracy: 0.9531 - val_loss: 0.1656
+
+The exact values can vary between runs.
+
+Let's understand what the output tells us.
+Q34. What does Epoch 1/10 mean?
+Answer:
+
+It means the model is currently training during the first epoch out of the 10 requested epochs.
+
+When it displays:
+Epoch 10/10
+
+the tenth and final epoch is being completed.
+Q35. What does 1875/1875 mean?
+Answer:
+
+It means that 1,875 out of 1,875 training batches have been processed during that epoch.
+
+Each batch contains up to 32 training images.
+
+Since there are 60,000 training images:
+\[
+60000/32=1875
+\]
+The model completes all 1,875 batches during each epoch.
+Q36. What does accuracy: 0.8378 mean?
+Answer:
+
+It means the model achieved approximately 83.78% training accuracy during that epoch.
+
+To convert a decimal accuracy value into a percentage, multiply it by 100.
+\[
+0.8378\times100=83.78\%
+\]
+The accuracy generally increases as the model learns better patterns.
+Q37. What does loss: 0.6342 mean?
+Answer:
+
+It is the training loss for that epoch.
+
+The model uses the loss function to measure how well its predicted probabilities match the correct labels.
+
+A lower loss generally indicates better predictions under that loss function.
+
+In your results, the training loss decreases from approximately 0.6342 in the first epoch to 0.1675 in the tenth epoch.
+
+This indicates that the model is improving its predictions on the training data.
+Q38. What is validation accuracy?
+Answer:
+
+Validation accuracy measures the model's classification accuracy on the data specified in validation_data.
+
+Your output includes:
+val_accuracy: 0.9531
+
+Converting it to a percentage:
+\[
+0.9531\times100=95.31\%
+\]
+This means the model correctly classified approximately 95.31% of the validation images.
+
+In your notebook, the validation images come from x_test.
+Q39. What is validation loss?
+Answer:
+
+Validation loss is the loss calculated on the validation data after an epoch.
+
+Your final validation loss is approximately:
+val_loss: 0.1656
+
+The validation loss helps us understand how well the model's predictions match the correct labels on data not used for weight updates.
+Q40. What do the training results tell us?
+Answer:
+
+Your results show that, over 10 epochs:
+- Training accuracy increases.
+- Training loss decreases.
+- Validation accuracy increases.
+- Validation loss decreases.
+This is a good indication that the model is learning useful patterns from the MNIST dataset.
+
+At the tenth epoch, both training and validation accuracy are approximately 95.31%.
+
+However, accuracy alone does not prove that a model generalizes well in every situation. We should also consider validation loss, the difference between training and validation performance, and the quality of the evaluation procedure.
+Quick viva question: What is overfitting?
+Answer:
+
+Overfitting occurs when a model learns the training data too specifically and performs poorly on new, unseen data.
+
+For example, a model might achieve 99% training accuracy but only 80% accuracy on unseen images.
+
+A large gap between training and validation performance can be a warning sign of overfitting, although the gap must be interpreted in context.
+Part 11: Evaluating the Trained Model
+Q41. Why do we evaluate the model after training?
+Answer:
+
+Training teaches the model to recognize patterns. Evaluation measures how well the trained model performs on the specified evaluation dataset.
+
+We use the evaluation results to understand the model's performance after training.
+Q42. Explain the evaluation code line by line.
+Your code
+loss, accuracy = model.evaluate(x_test, y_test)print("Test Loss:", loss)print("Test Accuracy:", accuracy)
+
+
+Line 1
+loss, accuracy = model.evaluate(x_test, y_test)
+
+
+Let's break this down.
+
+What does model.evaluate() do?
+
+It evaluates the trained model on the supplied data and returns the loss and configured evaluation metrics.
+
+What is x_test?
+
+It contains the 10,000 test images.
+
+What is y_test?
+
+It contains the correct labels for those images.
+
+What does loss, accuracy = mean?
+
+It assigns the returned loss to the variable loss and the returned accuracy to the variable accuracy.
+Line 2
+print("Test Loss:", loss)
+
+
+This displays the calculated loss on the test dataset.
+Line 3
+print("Test Accuracy:", accuracy)
+
+
+This displays the calculated accuracy on the test dataset.
+Q43. Explain your actual evaluation output.
+Your notebook displays:
+Test Loss: 0.16561195254325867
+Test Accuracy: 0.9531000256538391
+
+What does the test loss mean?
+The test loss is approximately:
+0.1656
+
+It measures how well the model's predicted probabilities match the correct test labels according to the configured loss function.
+
+Generally, lower loss indicates better predictions.
+What does the test accuracy mean?
+The test accuracy is approximately:
+0.9531
+
+Converting it to a percentage:
+\[
+0.9531\times100=95.31\%
+\]
+The model correctly classifies approximately 95.31% of the test images.
+
+For 10,000 test images, that corresponds to approximately:
+\[
+10000\times0.9531=9531
+\]
+So, we can interpret the result as approximately 9,531 correctly classified images out of 10,000 and 469 incorrectly classified images.
+
+The precise counts can differ slightly from this approximation because the displayed accuracy is rounded.
+Viva question: What is the difference between fit() and evaluate()?
+Answer:
+- model.fit() trains the model by updating its trainable parameters.
+- model.evaluate() measures the model's loss and metrics on the supplied dataset without performing training updates.
+Viva question: Why do we use test data?
+
+We use test data to assess how well the trained model classifies images that were not used for its weight updates.
+
+Viva question: Is 95.31% accuracy good?
+
+For this basic feedforward neural network trained on MNIST, 95.31% test accuracy is a reasonable result. More sophisticated architectures can often achieve higher accuracy on this dataset.
+Part 12: Plotting Training Loss and Accuracy
+Your experiment also requires plotting training loss and accuracy.
+Q44. Why do we plot training loss and accuracy?
+Answer:
+
+We plot these values to understand how the model's performance changes over the training epochs.
+
+The graphs help us determine whether the model is learning and whether its performance is improving.
+
+We can use the history object returned by model.fit() to create these graphs.
+Code to plot training loss
+plt.plot(history.history['loss'], label='Training Loss')plt.plot(history.history['val_loss'], label='Validation Loss')plt.xlabel('Epoch')plt.ylabel('Loss')plt.title('Training and Validation Loss')plt.legend()plt.show()
+
+
+Let's explain each line.
+Line 1
+plt.plot(history.history['loss'], label='Training Loss')
+
+
+history.history stores the metrics recorded during training.
+
+history.history['loss'] contains the training loss values for each epoch.
+
+For your experiment, it contains 10 values.
+
+plt.plot() draws a line graph of those values.
+
+label='Training Loss' gives the line a name for the legend.
+Line 2
+plt.plot(history.history['val_loss'], label='Validation Loss')
+
+
+This plots the validation loss values recorded during each epoch.
+
+By plotting both training and validation loss, we can compare how the model performs on the training data and the validation data.
+Line 3
+plt.xlabel('Epoch')
+
+
+This labels the horizontal axis as Epoch.
+Line 4
+plt.ylabel('Loss')
+
+
+This labels the vertical axis as Loss.
+Line 5
+plt.title('Training and Validation Loss')
+
+
+This adds a title to the graph.
+Line 6
+plt.legend()
+
+
+This displays the legend so we can distinguish the training-loss line from the validation-loss line.
+Line 7
+plt.show()
+
+
+This displays the completed graph.
+What should the graph look like?
+You should generally see both loss curves decreasing over the 10 epochs.
+
+This is consistent with your training results, where the training loss falls from approximately 0.6342 to 0.1675, and the validation loss falls from approximately 0.3572 to 0.1656.
+
+Viva question: What does a decreasing loss curve indicate?
+
+It generally indicates that the model is improving its predictions according to the selected loss function.
+Q45. Explain the accuracy graph.
+Use this code:
+plt.plot(history.history['accuracy'], label='Training Accuracy')plt.plot(history.history['val_accuracy'], label='Validation Accuracy')plt.xlabel('Epoch')plt.ylabel('Accuracy')plt.title('Training and Validation Accuracy')plt.legend()plt.show()
+
+
+The first line plots the training accuracy for each epoch.
+
+The second line plots validation accuracy for each epoch.
+
+The remaining lines add axis labels, a title, a legend, and display the graph.
+What should the graph look like?
+Your accuracy curves should generally increase over the 10 epochs.
+
+Your notebook shows training accuracy increasing from approximately 83.78% in the first epoch to 95.31% in the tenth epoch.
+
+Validation accuracy increases from approximately 90.33% to 95.31%.
+
+Viva question: What does an increasing accuracy curve indicate?
+
+It indicates that the proportion of correctly classified images is generally increasing during training.
+
+Viva question: Why plot both training and validation accuracy?
+
+Comparing the two helps us understand whether improvements on training data are accompanied by improvements on validation data.
+Part 13: Displaying a Random Test Image
+Q46. Explain this code line by line.
+Your notebook contains:
+n = random.randint(0, 9999)plt.imshow(x_test[n], cmap='gray')plt.show()
+
+
+Line 1
+n = random.randint(0, 9999)
+
+
+This generates a random integer between 0 and 9999, including both endpoints.
+
+Why these numbers?
+
+The test dataset contains 10,000 images, indexed from 0 to 9999.
+
+The randomly generated value is stored in n.
+
+For example, suppose:
+n = 527
+
+
+The program selects the test image at index 527.
+
+Your actual value will vary.
+Line 2
+plt.imshow(x_test[n], cmap='gray')
+
+
+Let's break it down.
+- x_test[n] selects one test image.
+- plt.imshow() displays the image.
+- cmap='gray' uses a grayscale color map.
+Because the image contains grayscale pixel values, it is displayed in shades of gray.
+Line 3
+plt.show()
+
+
+This displays the selected image.
+What is the output?
+A randomly selected handwritten digit image appears.
+
+For example, it might show a handwritten 4, 7, or 9. The actual digit depends on which test image is selected.
+
+Viva question: Why do we use random.randint() here?
+
+To select a random test image for visualization.
+
+Viva question: What is the difference between plt.imshow() and plt.show()?
+
+plt.imshow() prepares the image for display, whereas plt.show() displays the figure.
+Part 14: Making Predictions
+Displaying an image lets us see the input, but we also want to know what digit the trained model predicts.
+
+Your notebook includes code for predicting the test dataset.
+Q47. Explain the prediction code.
+import numpy as npimport matplotlib.pyplot as pltfrom sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay# Predict test datay_pred = model.predict(x_test)# Convert predictions into class labelsy_pred = np.argmax(y_pred, axis=1)
+
+
+Let's understand it step by step.
+Line 1
+import numpy as np
+
+
+This imports NumPy, a Python library for numerical operations and array manipulation.
+
+np is its commonly used short name.
+
+We use NumPy here to select the class with the highest predicted score.
+Line 2
+import matplotlib.pyplot as plt
+
+
+This imports Matplotlib for plotting and visualization.
+
+Your notebook already imports it earlier, so repeating the import is unnecessary but harmless.
+Line 3
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+
+This imports two functions from scikit-learn.
+- confusion_matrix calculates a table comparing actual and predicted classes.
+- ConfusionMatrixDisplay helps visualize that table.
+Line 4
+y_pred = model.predict(x_test)
+
+
+This passes all 10,000 test images through the trained neural network.
+
+The model returns 10 predicted scores for every image, one for each digit class.
+
+Therefore, the shape of y_pred is:
+(10000, 10)
+
+This means:
+- 10,000 test images.
+- 10 predicted scores per image.
+For example, one image might produce:
+[0.01, 0.02, 0.01, 0.03, 0.01,
+ 0.02, 0.01, 0.86, 0.02, 0.01]
+
+The highest value is 0.86, which is at index 7.
+
+Therefore, the model predicts digit 7 for this illustrative example.
+
+These are example values, not the actual output from your notebook.
+Line 5
+y_pred = np.argmax(y_pred, axis=1)
+
+
+This line is extremely important.
+
+What is argmax()?
+
+argmax() returns the index of the largest value.
+
+For example:
+values = [0.1, 0.2, 0.7]
+
+
+The largest value is 0.7, located at index 2.
+
+Therefore:
+np.argmax(values)
+
+
+returns:
+2
+
+What does axis=1 mean?
+
+Your prediction array contains 10 scores for each image.
+
+axis=1 tells NumPy to find the highest-scoring class across the 10 values in each row.
+
+Consequently, it converts the model's scores into predicted digit labels.
+
+The shape changes from:
+(10000, 10)
+
+to:
+(10000,)
+
+The resulting array contains one predicted digit for each test image.
+
+Viva question: Why do we use np.argmax()?
+
+We use np.argmax() to select the class with the highest predicted score for each test image.
+
+Viva question: What is the difference between y_test and y_pred?
+- y_test contains the actual, correct digit labels.
+- y_pred contains the digit labels predicted by the trained model.
+Comparing these arrays helps us determine which predictions are correct.
+Part 15: Understanding the Confusion Matrix
+Q48. What is a confusion matrix?
+Answer:
+
+A confusion matrix is a table that compares the actual classes with the classes predicted by a classification model.
+
+It helps us understand not only how many predictions are correct, but also which classes the model confuses with one another.
+
+For example, a handwritten 4 might occasionally be misclassified as a 9.
+
+A confusion matrix can help us identify such errors.
+Q49. Explain the confusion matrix code.
+Line 1
+cm = confusion_matrix(y_test, y_pred)
+
+
+This compares the actual labels (y_test) with the predicted labels (y_pred).
+
+The resulting matrix is stored in cm.
+
+Because MNIST has 10 classes, the confusion matrix has 10 rows and 10 columns.
+
+Its shape is:
+(10, 10)
+
+Each row represents an actual digit, and each column represents a predicted digit.
+Line 2
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+
+
+This creates an object that can display the confusion matrix visually.
+
+The matrix we calculated is passed to it using the confusion_matrix argument.
+Line 3
+disp.plot(cmap='Blues')
+
+
+This displays the confusion matrix as a graph.
+
+cmap='Blues' selects a blue color scheme.
+
+The numbers and color intensity help us see which actual and predicted digit combinations occur most frequently.
+Line 4
+plt.title("Confusion Matrix")
+
+
+This adds the title Confusion Matrix to the graph.
+Line 5
+plt.show()
+
+
+This displays the graph.
+Q50. How do we interpret a confusion matrix?
+Consider this small, illustrative example involving only digits 0 and 1:
+Actual / Predicted	Predicted 0	Predicted 1
+Actual 0	95	5
+Actual 1	3	97
+
+
+What does the value 95 mean?
+
+It means that 95 images whose actual digit was 0 were correctly predicted as 0.
+
+What does the value 5 mean?
+
+It means that 5 images whose actual digit was 0 were incorrectly predicted as 1.
+
+What does the value 3 mean?
+
+It means that 3 images whose actual digit was 1 were incorrectly predicted as 0.
+
+What does the value 97 mean?
+
+It means that 97 images whose actual digit was 1 were correctly predicted as 1.
+
+These numbers are only an illustration. Your actual confusion matrix contains results for all 10 MNIST digit classes.
+Q51. What do the diagonal values represent?
+Answer:
+
+The diagonal contains the correctly classified images.
+
+For example:
+- Actual 0 predicted as 0.
+- Actual 1 predicted as 1.
+- Actual 2 predicted as 2.
+The values outside the diagonal represent misclassifications.
+
+Viva question: What does a good confusion matrix look like?
+
+A good confusion matrix generally has large values along the main diagonal and relatively small values outside it.
+
+Viva question: Why is a confusion matrix useful if we already know the accuracy?
+
+Accuracy gives an overall measure of performance. A confusion matrix reveals which classes are classified correctly and which classes are frequently confused.
+Part 16: Complete Viva Revision — Important Questions and Answers
+Sanika, these are the questions I would recommend revising just before your practical. Try to understand the answers rather than memorizing complicated definitions.
+A. Basic Machine Learning and Deep Learning Questions
+Q52. What is the aim of this experiment?
+Answer: To implement a feedforward neural network using Keras and TensorFlow to classify handwritten digits from the MNIST dataset, train it using Stochastic Gradient Descent (SGD), evaluate its performance, and plot training loss and accuracy.
+Q53. Which dataset is used in this experiment?
+Answer: The MNIST handwritten digit dataset, which contains 60,000 training images and 10,000 testing images of handwritten digits.
+Q54. What are the dimensions of each image?
+Answer: Each image has dimensions of 28 × 28 pixels.
+Q55. How many classes are present in MNIST?
+Answer: There are 10 classes, representing digits 0 through 9.
+Q56. What is the difference between AI, ML, and DL?
+Answer:
+- AI is the broad field of creating intelligent machines.
+- ML enables machines to learn patterns from data.
+- DL uses multilayer neural networks to learn complex patterns.
+Q57. What is a neuron?
+Answer: A neuron is a computational unit in a neural network that combines input values with weights and a bias, then applies an activation function to produce an output.
+Q58. What are the layers in your model?
+Answer: The model contains a Flatten layer, a hidden Dense layer with 128 neurons using ReLU, and an output Dense layer with 10 neurons using Softmax.
+Q59. Why is it called a feedforward network?
+Answer: Information flows from the input layer through the hidden layer to the output layer without feedback connections in the forward computation.
+Q60. What is an activation function?
+Answer: An activation function transforms a neuron's calculated output and introduces non-linearity into the network.
+Q61. Which activation functions are used in your model?
+Answer: ReLU is used in the hidden layer, and Softmax is used in the output layer.
+Q62. Why do we use ReLU?
+Answer: ReLU introduces non-linearity and helps the network learn complex patterns.
+Q63. Why do we use Softmax?
+Answer: Softmax converts the output scores into a probability distribution over the 10 digit classes.
+B. Dataset and Preprocessing Questions
+Q64. What is normalization?
+Answer: Normalization scales numerical data to a specified range. In this experiment, pixel values are divided by 255 to scale them from 0–255 to 0–1.
+Q65. What does astype("float32") do?
+Answer: It converts the array values to 32-bit floating-point numbers.
+Q66. What does .shape return?
+Answer: It returns the dimensions of an array.
+Q67. What is the difference between x_train and y_train?
+Answer: x_train contains training images, whereas y_train contains the corresponding correct digit labels.
+Q68. What is the difference between x_test and y_test?
+Answer: x_test contains testing images, whereas y_test contains their actual digit labels.
+Q69. Why do we use plt.imshow()?
+Answer: It displays an image represented as an array.
+Q70. Why do we use cmap='gray'?
+Answer: It displays the image using a grayscale color map.
+C. Model Architecture Questions
+Q71. What is Keras?
+Answer: Keras is a high-level Deep Learning API that simplifies building, training, and evaluating neural networks.
+Q72. What is TensorFlow?
+Answer: TensorFlow is an open-source framework for numerical computation and Machine Learning.
+Q73. What is a Dense layer?
+Answer: A Dense layer is a fully connected layer in which each neuron receives input from all units in the preceding layer.
+Q74. Why do we use Flatten?
+Answer: It converts each 28 × 28 image into a one-dimensional vector containing 784 values.
+Q75. How many neurons are present in the hidden layer?
+Answer: There are 128 neurons.
+Q76. How many neurons are present in the output layer?
+Answer: There are 10 neurons, one for each digit class.
+Q77. What is model.summary()?
+Answer: It displays the model's layers, output shapes, and parameter counts.
+Q78. How many trainable parameters does your model have?
+Answer: The model has 101,770 trainable parameters.
+
+The calculation is:
+
+Hidden layer:
+\[
+(784\times128)+128=100,480
+\]
+Output layer:
+\[
+(128\times10)+10=1,290
+\]
+Total:
+\[
+100,480+1,290=\boxed{101,770}
+\]
+D. Training Questions
+Q79. What is model.compile()?
+Answer: It configures the optimizer, loss function, and metrics used for training and evaluating the model.
+Q80. What is SGD?
+Answer: Stochastic Gradient Descent is an optimization algorithm that updates the model's parameters using gradient information to reduce loss.
+Q81. What is a loss function?
+Answer: A loss function measures the discrepancy between the model's predictions and the correct targets.
+Q82. Why do we use sparse categorical cross-entropy?
+Answer: Because this is a multiclass classification problem in which the correct labels are represented as integers from 0 to 9.
+Q83. What is an epoch?
+Answer: An epoch is one complete pass through the training dataset.
+Q84. What is batch size?
+Answer: Batch size is the number of training samples processed in one batch.
+Q85. What is the batch size in your experiment?
+Answer: 32.
+Q86. How many batches are processed in one epoch?
+Answer:
+\[
+\frac{60,000}{32}=\boxed{1,875}
+\]
+Q87. What does model.fit() do?
+Answer: It trains the model on the provided data and records training and validation metrics.
+Q88. What does the history variable contain?
+Answer: It contains the training history, including loss, accuracy, validation loss, and validation accuracy for each epoch.
+Q89. What is the difference between training loss and validation loss?
+Answer: Training loss is calculated on training data, while validation loss is calculated on the specified validation data.
+Q90. What is overfitting?
+Answer: Overfitting occurs when a model learns the training data too specifically and performs poorly on unseen data.
+E. Evaluation and Output Questions
+Q91. What does model.evaluate() do?
+Answer: It calculates the loss and configured evaluation metrics for the supplied dataset without updating the model's weights.
+Q92. What is the final test accuracy in your experiment?
+Answer: Approximately 95.31%.
+Q93. What is the final test loss?
+Answer: Approximately 0.1656.
+Q94. What does 95.31% accuracy mean?
+Answer: It means that approximately 95.31% of the test images were classified correctly.
+Q95. Why do we plot training loss?
+Answer: To observe how the model's prediction error changes across epochs.
+Q96. Why do we plot accuracy?
+Answer: To observe how the proportion of correctly classified images changes during training.
+Q97. What is np.argmax()?
+Answer: It returns the index of the largest value. In this experiment, it identifies the predicted digit class with the highest score for each image.
+Q98. What is a confusion matrix?
+Answer: It is a table comparing actual class labels with predicted class labels.
+Q99. What do the diagonal values of a confusion matrix represent?
+Answer: They represent correctly classified samples for each class.
+Q100. What is the conclusion of your experiment?
+Answer: We successfully implemented and trained a feedforward neural network using Keras and TensorFlow on the MNIST dataset. The model achieved approximately 95.31% test accuracy. We evaluated the model using loss and accuracy, visualized handwritten digit images, and used a confusion matrix to examine classification performance.
+Part 17: The Entire Experiment in One Simple Flow
+If your examiner asks you to explain the complete experiment verbally, follow this sequence:
+
+Step 1: Import libraries
+
+We import TensorFlow, Keras, Matplotlib, and Python's random module.
+
+Step 2: Load the dataset
+
+We load MNIST, containing 60,000 training images and 10,000 testing images.
+
+Step 3: Preprocess the data
+
+We convert pixel values to float32 and divide them by 255 to normalize them to the range 0–1.
+
+Step 4: Visualize an image
+
+We use Matplotlib to display a handwritten digit from the dataset.
+
+Step 5: Build the model
+
+We create a Sequential neural network containing a Flatten layer, a 128-neuron Dense hidden layer with ReLU, and a 10-neuron Dense output layer with Softmax.
+
+Step 6: Compile the model
+
+We use SGD as the optimizer, sparse categorical cross-entropy as the loss function, and accuracy as the metric.
+
+Step 7: Train the model
+
+We use model.fit() for 10 epochs with a batch size of 32.
+
+Step 8: Evaluate the model
+
+We use model.evaluate() to calculate test loss and test accuracy.
+
+Step 9: Plot the graphs
+
+We plot training and validation loss and accuracy using the history object.
+
+Step 10: Examine predictions
+
+We use model.predict() to generate predictions, np.argmax() to obtain the predicted classes, and a confusion matrix to inspect classification errors.
+My final advice for your viva ❤️
+If you have limited time, prioritize these five things:
+1. Understand the architecture: Flatten → Dense(128, ReLU) → Dense(10, Softmax).
+2. Know the difference between an epoch and a batch: 10 epochs, batch size 32.
+3. Remember the compilation settings: SGD, sparse categorical cross-entropy, accuracy.
+4. Understand the final output: Approximately 95.31% test accuracy and 0.1656 test loss.
+5. Be able to explain the training process: Prediction → loss calculation → parameter updates → improved predictions.
+Most importantly, don't panic if the examiner changes a number in the code. If you understand why each line exists, you'll be able to explain it even when the code looks slightly different.
+
+You don't need to become an ML expert overnight. For tomorrow's practical, your goal is to understand what your code does, why you used each component, and how to interpret the results. You can absolutely work toward that, one concept at a time.
